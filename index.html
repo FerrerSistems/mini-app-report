@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Bot Report</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+        }
+        .tg-button {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .tg-button:hover { background: #1b5e20; }
+        input {
+            padding: 10px;
+            width: 80%;
+            max-width: 300px;
+            border: 1px solid #555;
+            background: #333;
+            color: white;
+            border-radius: 6px;
+            margin: 8px;
+        }
+        #result { margin-top: 15px; color: #aaa; }
+    </style>
+</head>
+<body>
+    <h2>📢 Reportar usuario</h2>
+    <input type="text" id="username" placeholder="Ingresa @usuario o link" />
+    <input type="number" id="limit" placeholder="Cantidad de reportes" min="1" max="50" value="10" />
+    <button class="tg-button" onclick="sendReport()">Enviar reporte</button>
+    <div id="result"></div>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        function sendReport() {
+            const user = document.getElementById('username').value.trim();
+            const limit = document.getElementById('limit').value;
+            if (!user) {
+                document.getElementById('result').innerText = '❌ Ingresa un usuario o enlace.';
+                return;
+            }
+            tg.sendData(JSON.stringify({ action: 'report', target: user, quantity: limit }));
+            document.getElementById('result').innerText = '✅ Datos enviados al bot.';
+        }
+    </script>
+</body>
+</html>
