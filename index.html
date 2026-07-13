@@ -261,55 +261,30 @@
             font-weight: 600;
         }
 
-        .quick-commands {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        .quick-cmd {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 12px;
-            font-size: 13px;
-            cursor: pointer;
-            text-align: center;
-            color: var(--text);
-            transition: all 0.2s;
-        }
-
-        .quick-cmd:hover {
-            border-color: var(--accent);
-            background: rgba(0, 200, 83, 0.05);
-        }
-
-        .quick-cmd .cmd-name {
-            font-weight: 600;
-            margin-bottom: 2px;
-        }
-
-        .quick-cmd .cmd-desc {
-            font-size: 11px;
-            color: var(--text-secondary);
-        }
-
         .result-box {
             background: var(--bg);
             border-radius: 12px;
             padding: 12px;
             margin-top: 12px;
             font-size: 13px;
-            max-height: 300px;
+            max-height: 400px;
             overflow-y: auto;
             word-break: break-word;
             display: none;
             border: 1px solid var(--border);
+            position: relative;
         }
 
-        .result-box code {
-            font-family: monospace;
-            color: var(--accent);
+        .result-box .copy-btn {
+            display: inline-block;
+            background: var(--accent);
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 8px;
         }
 
         .loading-spinner {
@@ -338,9 +313,6 @@
 
         @media (max-width: 360px) {
             .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            .quick-commands {
                 grid-template-columns: 1fr;
             }
         }
@@ -541,12 +513,36 @@
         console.log('[MiniApp] Inicializada, API_BASE:', API_BASE);
         console.log('[MiniApp] Usuario Telegram:', user);
 
-        // Función para mostrar resultado con formato
+        // Copiar al portapapeles
+        function copyToClipboard(text) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).catch(e => console.error(e));
+            } else {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            }
+        }
+
+        // Mostrar resultado en caja
         function showResult(elementId, html) {
             const el = document.getElementById(elementId);
             if (!el) return;
             el.style.display = 'block';
             el.innerHTML = html;
+
+            // Añadir botones de copiar a cada <code>
+            const codes = el.querySelectorAll('code');
+            codes.forEach(code => {
+                const btn = document.createElement('button');
+                btn.className = 'copy-btn';
+                btn.textContent = 'Copiar';
+                btn.onclick = () => copyToClipboard(code.textContent);
+                code.parentNode.insertBefore(btn, code.nextSibling);
+            });
         }
 
         function hideResult(elementId) {
@@ -566,17 +562,34 @@
             return `<div style="color:var(--accent);">✅ ${message}</div>`;
         }
 
-        function formatMessages(messages) {
-            if (!messages || messages.length === 0) return successHTML('Comando ejecutado');
+        // Renderiza mensajes + teclado inline
+        function renderResponse(resultElementId, data) {
             let html = '';
-            messages.forEach(msg => {
-                // Si el mensaje contiene <code> lo dejamos pasar, si no lo escapamos
-                const text = msg.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                html += `<div>${text}</div>`;
-            });
-            return html;
+            if (data.messages && data.messages.length > 0) {
+                html += data.messages.map(msg => `<div style="margin-bottom:8px;">${msg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`).join('');
+            } else {
+                html += successHTML('Comando ejecutado');
+            }
+            // Teclado inline
+            if (data.keyboard && Array.isArray(data.keyboard)) {
+                html += '<div style="margin-top:12px;display:flex;flex-direction:column;gap:4px;">';
+                data.keyboard.forEach(row => {
+                    html += '<div style="display:flex;gap:4px;">';
+                    row.forEach(btn => {
+                        if (btn.url) {
+                            html += `<a href="${btn.url}" target="_blank" class="btn btn-outline" style="flex:1;">${btn.text}</a>`;
+                        } else if (btn.callback_data) {
+                            html += `<button class="btn btn-outline" style="flex:1;" onclick="sendCallback('${btn.callback_data.replace(/'/g, "\\'")}', '${resultElementId}')">${btn.text}</button>`;
+                        }
+                    });
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+            showResult(resultElementId, html);
         }
 
+        // Enviar comando normal
         async function sendCommand(command, resultElementId) {
             const userId = user.id;
             if (!userId) {
@@ -591,9 +604,7 @@
                 if (data.error) {
                     showResult(resultElementId, errorHTML(data.error));
                 } else {
-                    // data.messages contiene las respuestas del bot
-                    const messages = data.messages || [];
-                    showResult(resultElementId, formatMessages(messages));
+                    renderResponse(resultElementId, data);
                 }
             } catch (e) {
                 console.error(e);
@@ -618,6 +629,25 @@
             sendCommand('/report ' + target + ' ' + ids + ' ' + quantity, 'report-result');
         }
 
+        // Enviar callback inline
+        async function sendCallback(callbackData, resultElementId) {
+            const userId = user.id;
+            if (!userId) return;
+            showResult(resultElementId, loadingHTML('Procesando...'));
+            try {
+                const url = `${API_BASE}/api/callback?user_id=${userId}&data=${encodeURIComponent(callbackData)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.error) {
+                    showResult(resultElementId, errorHTML(data.error));
+                } else {
+                    renderResponse(resultElementId, data);
+                }
+            } catch (e) {
+                showResult(resultElementId, errorHTML('Error de conexión'));
+            }
+        }
+
         // Monitoreo
         async function loadMonitorList() {
             const userId = user.id;
@@ -638,7 +668,6 @@
                 let html = '<ul style="list-style:none;padding:0;">';
                 links.forEach(l => {
                     const emoji = { active: '🟢', banned: '🔴', not_found: '❌', private: '🔒', unknown: '❓' }[l.status] || '❓';
-                    // Construir enlace completo: si el link empieza con @, lo convertimos en https://t.me/...
                     let fullLink = l.link;
                     if (l.link.startsWith('@')) {
                         fullLink = `https://t.me/${l.link.substring(1)}`;
@@ -658,8 +687,6 @@
             }
         }
 
-
-        
         async function loadBannedHistory() {
             const userId = user.id;
             if (!userId) return;
