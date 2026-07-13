@@ -487,11 +487,17 @@
         tg.setBackgroundColor('#0f0f0f');
 
         const user = tg.initDataUnsafe?.user || {};
+        const API_BASE = 'https://report-production-d6d6.up.railway.app';   // <-- TU DOMINIO
+
+        console.log('[MiniApp] Inicializada, API_BASE:', API_BASE);
+        console.log('[MiniApp] Usuario Telegram:', user);
 
         function showStatus(elementId, type, message) {
             const el = document.getElementById(elementId);
+            if (!el) return;
             el.className = 'status ' + type;
             el.textContent = message;
+            console.log('[MiniApp] Status:', type, message);
             setTimeout(() => {
                 el.className = 'status';
                 el.textContent = '';
@@ -499,6 +505,7 @@
         }
 
         function switchTab(tabName) {
+            console.log('[MiniApp] Cambiando a pestaña:', tabName);
             document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
             document.getElementById('tab-' + tabName).style.display = 'block';
             document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
@@ -509,37 +516,33 @@
             }
         }
 
-        async function refreshStats() {
-            const userId = tg.initDataUnsafe?.user?.id;
+        // ---------- API para comandos ----------
+        async function sendCommand(command) {
+            const userId = user.id;
             if (!userId) {
                 showStatus('me-status', 'error', '❌ No se pudo obtener el ID de usuario.');
                 return;
             }
+
+            console.log('[MiniApp] Enviando comando:', command);
+            showStatus('me-status', 'info', '⏳ Ejecutando ' + command + '...');
+
             try {
-                const response = await fetch(`https://report-production-d6d6.up.railway.app/api/me?user_id=${userId}`);
+                const url = `${API_BASE}/api/command?user_id=${userId}&command=${encodeURIComponent(command)}`;
+                console.log('[MiniApp] FETCH a:', url);
+                const response = await fetch(url);
                 const data = await response.json();
+                console.log('[MiniApp] Respuesta:', data);
+
                 if (data.error) {
                     showStatus('me-status', 'error', '❌ ' + data.error);
-                    return;
+                } else {
+                    showStatus('me-status', 'success', '✅ ' + (data.message || 'Comando ejecutado'));
                 }
-                document.getElementById('stat-id').textContent = data.user_id;
-                document.getElementById('stat-remaining').textContent = data.remaining;
-                document.getElementById('stat-sessions').textContent = data.sessions;
-                document.getElementById('stat-links').textContent = data.links;
-                showStatus('me-status', 'success', '✅ Estadísticas actualizadas.');
             } catch (e) {
-                console.error(e);
-                showStatus('me-status', 'error', '❌ Error de conexión.');
+                console.error('[MiniApp] Error de conexión:', e);
+                showStatus('me-status', 'error', '❌ Error de conexión. Revisa la red.');
             }
-        }
-
-        function sendCommand(command) {
-            const data = JSON.stringify({
-                action: 'command',
-                command: command
-            });
-            tg.sendData(data);
-            showStatus('me-status', 'info', '⏳ Solicitando ' + command + '...');
         }
 
         function sendCommandWithArg(command, inputId) {
@@ -548,15 +551,13 @@
                 showStatus('monitor-status', 'error', '❌ Ingresa un usuario o enlace válido.');
                 return;
             }
-            const data = JSON.stringify({
-                action: 'command',
-                command: command + ' ' + arg
-            });
-            tg.sendData(data);
-            showStatus('monitor-status', 'info', '⏳ Ejecutando ' + command + '...');
+            const fullCommand = command + ' ' + arg;
+            console.log('[MiniApp] Enviando comando con argumento:', fullCommand);
+            sendCommand(fullCommand);
+            showStatus('monitor-status', 'info', '⏳ Ejecutando ' + fullCommand + '...');
         }
 
-        function sendReport() {
+        async function sendReport() {
             const target = document.getElementById('report-target').value.trim();
             const ids = document.getElementById('report-ids').value.trim();
             const quantity = document.getElementById('report-quantity').value.trim();
@@ -575,25 +576,56 @@
             }
 
             const command = '/report ' + target + ' ' + ids + ' ' + quantity;
-            const data = JSON.stringify({
-                action: 'command',
-                command: command
-            });
-            tg.sendData(data);
-            showStatus('report-status', 'success', '✅ Reporte enviado al bot: ' + command);
+            console.log('[MiniApp] Enviando reporte:', command);
+            await sendCommand(command);
+            showStatus('report-status', 'success', '✅ Reporte enviado: ' + command);
         }
 
+        // ---------- Actualizar estadísticas (sección Mi Cuenta) ----------
+        async function refreshStats() {
+            const userId = user.id;
+            if (!userId) {
+                showStatus('me-status', 'error', '❌ No se pudo obtener el ID de usuario.');
+                return;
+            }
+
+            console.log('[MiniApp] Actualizando estadísticas para usuario', userId);
+            try {
+                const url = `${API_BASE}/api/me?user_id=${userId}`;
+                console.log('[MiniApp] FETCH a:', url);
+                const response = await fetch(url);
+                const data = await response.json();
+                console.log('[MiniApp] Datos de /api/me:', data);
+
+                if (data.error) {
+                    showStatus('me-status', 'error', '❌ ' + data.error);
+                    return;
+                }
+
+                document.getElementById('stat-id').textContent = data.user_id;
+                document.getElementById('stat-remaining').textContent = data.remaining;
+                document.getElementById('stat-sessions').textContent = data.sessions;
+                document.getElementById('stat-links').textContent = data.links;
+                showStatus('me-status', 'success', '✅ Estadísticas actualizadas.');
+            } catch (e) {
+                console.error('[MiniApp] Error al obtener estadísticas:', e);
+                showStatus('me-status', 'error', '❌ Error de conexión.');
+            }
+        }
+
+        // Ajuste del tamaño de la ventana
         tg.onEvent('viewportChanged', ({ isStateStable }) => {
             if (isStateStable) {
                 document.body.style.height = window.innerHeight + 'px';
             }
         });
 
+        // Mostrar ID de usuario al cargar
         if (user.id) {
             document.getElementById('stat-id').textContent = user.id;
         }
 
-        console.log('Mini App GhostReports cargada correctamente.');
+        console.log('[MiniApp] GhostReports cargada correctamente.');
     </script>
 </body>
 </html>
