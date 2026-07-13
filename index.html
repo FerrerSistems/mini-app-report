@@ -2,63 +2,574 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Bot Report</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>GhostReports - Panel de Control</title>
     <style>
+        :root {
+            --bg: #0f0f0f;
+            --card: #1a1a1a;
+            --accent: #00c853;
+            --accent-hover: #00e676;
+            --text: #e0e0e0;
+            --text-secondary: #9e9e9e;
+            --border: #2a2a2a;
+            --danger: #ff5252;
+            --warning: #ffd740;
+            --info: #40c4ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #1a1a1a;
-            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 16px;
+            padding-top: calc(env(safe-area-inset-top) + 16px);
+            padding-bottom: calc(env(safe-area-inset-bottom) + 80px);
+        }
+
+        .header {
             text-align: center;
+            margin-bottom: 24px;
+            padding: 16px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00c853, #00e676);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
             padding: 20px;
+            margin-bottom: 16px;
+            animation: fadeIn 0.3s ease-out;
         }
-        .tg-button {
-            background: #2e7d32;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
+
+        .card-title {
             font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title .icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .icon-report { background: rgba(0, 200, 83, 0.15); color: #00c853; }
+        .icon-monitor { background: rgba(64, 196, 255, 0.15); color: #40c4ff; }
+        .icon-stats { background: rgba(255, 215, 64, 0.15); color: #ffd740; }
+        .icon-action { background: rgba(255, 82, 82, 0.15); color: #ff5252; }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        .form-input:focus, .form-textarea:focus {
+            border-color: var(--accent);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-hint {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
-            margin: 5px;
+            transition: all 0.2s;
+            font-family: inherit;
+            margin-top: 8px;
         }
-        .tg-button:hover { background: #1b5e20; }
-        input {
+
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        .btn-primary:active { transform: scale(0.98); }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-outline:hover { background: rgba(0, 200, 83, 0.1); }
+
+        .btn-danger {
+            background: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .btn-danger:hover { background: rgba(255, 82, 82, 0.1); }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .stat-item {
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .status.success {
+            display: block;
+            background: rgba(0, 200, 83, 0.1);
+            border: 1px solid rgba(0, 200, 83, 0.3);
+            color: #00c853;
+        }
+
+        .status.error {
+            display: block;
+            background: rgba(255, 82, 82, 0.1);
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            color: #ff5252;
+        }
+
+        .status.info {
+            display: block;
+            background: rgba(64, 196, 255, 0.1);
+            border: 1px solid rgba(64, 196, 255, 0.3);
+            color: #40c4ff;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+            background: var(--card);
+            border-radius: 12px;
+            padding: 4px;
+        }
+
+        .tab {
+            flex: 1;
             padding: 10px;
-            width: 80%;
-            max-width: 300px;
-            border: 1px solid #555;
-            background: #333;
-            color: white;
-            border-radius: 6px;
-            margin: 8px;
+            text-align: center;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.2s;
         }
-        #result { margin-top: 15px; color: #aaa; }
+
+        .tab.active {
+            background: var(--bg);
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .quick-commands {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .quick-cmd {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 13px;
+            cursor: pointer;
+            text-align: center;
+            color: var(--text);
+            transition: all 0.2s;
+        }
+
+        .quick-cmd:hover {
+            border-color: var(--accent);
+            background: rgba(0, 200, 83, 0.05);
+        }
+
+        .quick-cmd .cmd-name {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .quick-cmd .cmd-desc {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 24px;
+            padding: 16px;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 360px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .quick-commands {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
-    <h2>📢 Reportar usuario</h2>
-    <input type="text" id="username" placeholder="Ingresa @usuario o link" />
-    <input type="number" id="limit" placeholder="Cantidad de reportes" min="1" max="50" value="10" />
-    <button class="tg-button" onclick="sendReport()">Enviar reporte</button>
-    <div id="result"></div>
+
+    <div class="header">
+        <div class="logo">GhostReports</div>
+        <div class="subtitle">Panel de Control</div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('report')">📊 Reportes</div>
+        <div class="tab" onclick="switchTab('monitor')">🔍 Monitoreo</div>
+        <div class="tab" onclick="switchTab('me')">👤 Mi Cuenta</div>
+    </div>
+
+    <!-- Tab Reportes -->
+    <div id="tab-report" class="tab-content">
+        <div class="card">
+            <div class="card-title">
+                <div class="icon icon-report">📊</div>
+                Reporte Masivo
+            </div>
+            <div class="form-group">
+                <label class="form-label">Usuario o Enlace</label>
+                <input type="text" class="form-input" id="report-target" placeholder="@usuario o https://t.me/...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">IDs de Mensajes</label>
+                <input type="text" class="form-input" id="report-ids" placeholder="123, 456, 789">
+                <span class="form-hint">Separa los IDs con comas o espacios</span>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Cantidad de Reportes (1-200)</label>
+                <input type="number" class="form-input" id="report-quantity" value="10" min="1" max="200">
+            </div>
+            <button class="btn btn-primary" onclick="sendReport()">
+                🚀 Enviar Reporte
+            </button>
+            <div id="report-status" class="status"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                <div class="icon icon-action">⚡</div>
+                Comandos Rápidos
+            </div>
+            <div class="quick-commands">
+                <div class="quick-cmd" onclick="sendCommand('/getids')">
+                    <div class="cmd-name">🆔 Get IDs</div>
+                    <div class="cmd-desc">Obtener IDs de mensajes</div>
+                </div>
+                <div class="quick-cmd" onclick="sendCommand('/getidpin')">
+                    <div class="cmd-name">📌 Pinned IDs</div>
+                    <div class="cmd-desc">IDs de mensajes fijados</div>
+                </div>
+                <div class="quick-cmd" onclick="sendCommand('/photo')">
+                    <div class="cmd-name">📸 Reportar Foto</div>
+                    <div class="cmd-desc">Reportar foto de perfil</div>
+                </div>
+                <div class="quick-cmd" onclick="sendCommand('/history')">
+                    <div class="cmd-name">📖 Reportar Historia</div>
+                    <div class="cmd-desc">Reportar historias</div>
+                </div>
+                <div class="quick-cmd" onclick="sendCommand('/bot')">
+                    <div class="cmd-name">🤖 Reportar Bot</div>
+                    <div class="cmd-desc">Reportar bots de spam</div>
+                </div>
+                <div class="quick-cmd" onclick="sendCommand('/join')">
+                    <div class="cmd-name">🔗 Unirse</div>
+                    <div class="cmd-desc">Unirse a grupo/canal</div>
+                </div>
+                <div class="quick-cmd" onclick="sendCommand('/leave')">
+                    <div class="cmd-name">🚪 Salir</div>
+                    <div class="cmd-desc">Salir de grupo/canal</div>
+                </div>
+                <div class="quick-cmd" onclick="sendCommand('/help')">
+                    <div class="cmd-name">❓ Ayuda</div>
+                    <div class="cmd-desc">Ver todos los comandos</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Monitoreo -->
+    <div id="tab-monitor" class="tab-content" style="display:none;">
+        <div class="card">
+            <div class="card-title">
+                <div class="icon icon-monitor">🔍</div>
+                Monitoreo de Usuarios
+            </div>
+            <div class="form-group">
+                <label class="form-label">Agregar a Monitoreo</label>
+                <input type="text" class="form-input" id="monitor-add-target" placeholder="@usuario o enlace">
+            </div>
+            <button class="btn btn-primary" onclick="sendCommandWithArg('/monitoradd', 'monitor-add-target')">
+                ➕ Agregar
+            </button>
+
+            <div class="form-group" style="margin-top:16px;">
+                <label class="form-label">Eliminar de Monitoreo</label>
+                <input type="text" class="form-input" id="monitor-remove-target" placeholder="@usuario o enlace">
+            </div>
+            <button class="btn btn-danger" onclick="sendCommandWithArg('/monitorremove', 'monitor-remove-target')">
+                🗑️ Eliminar
+            </button>
+
+            <div style="margin-top:16px;">
+                <button class="btn btn-outline" onclick="sendCommand('/monitorlist')">
+                    📋 Ver Mi Lista
+                </button>
+            </div>
+            <div style="margin-top:8px;">
+                <button class="btn btn-outline" onclick="sendCommand('/monitorlistban')">
+                    🚫 Historial de Baneados
+                </button>
+            </div>
+            <div id="monitor-status" class="status"></div>
+        </div>
+    </div>
+
+    <!-- Tab Mi Cuenta -->
+    <div id="tab-me" class="tab-content" style="display:none;">
+        <div class="card">
+            <div class="card-title">
+                <div class="icon icon-stats">👤</div>
+                Mi Cuenta
+            </div>
+            <div class="stats-grid" id="user-stats">
+                <div class="stat-item">
+                    <div class="stat-value">--</div>
+                    <div class="stat-label">ID de Usuario</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">--</div>
+                    <div class="stat-label">Acceso Restante</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">--</div>
+                    <div class="stat-label">Sesiones Activas</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">--</div>
+                    <div class="stat-label">Links Monitoreados</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="sendCommand('/me')">
+                🔄 Actualizar Estadísticas
+            </button>
+            <div id="me-status" class="status"></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>© 2026 <a href="https://t.me/ferrersistems" target="_blank">GhostReports</a> - Todos los derechos reservados.</p>
+        <p style="margin-top:4px;">Usa este bot de manera responsable.</p>
+    </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const tg = window.Telegram.WebApp;
+
         tg.ready();
         tg.expand();
+        tg.setHeaderColor('#0f0f0f');
+        tg.setBackgroundColor('#0f0f0f');
 
-        function sendReport() {
-            const user = document.getElementById('username').value.trim();
-            const limit = document.getElementById('limit').value;
-            if (!user) {
-                document.getElementById('result').innerText = '❌ Ingresa un usuario o enlace.';
+        const user = tg.initDataUnsafe?.user || {};
+
+        function showStatus(elementId, type, message) {
+            const el = document.getElementById(elementId);
+            el.className = 'status ' + type;
+            el.textContent = message;
+            setTimeout(() => {
+                el.className = 'status';
+                el.textContent = '';
+            }, 5000);
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            document.getElementById('tab-' + tabName).style.display = 'block';
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (tabName === 'me') {
+                sendCommand('/me');
+            }
+        }
+
+        function sendCommand(command) {
+            const data = JSON.stringify({
+                action: 'command',
+                command: command
+            });
+            tg.sendData(data);
+            showStatus('me-status', 'info', '⏳ Solicitando ' + command + '...');
+        }
+
+        function sendCommandWithArg(command, inputId) {
+            const arg = document.getElementById(inputId).value.trim();
+            if (!arg) {
+                showStatus('monitor-status', 'error', '❌ Ingresa un usuario o enlace válido.');
                 return;
             }
-            tg.sendData(JSON.stringify({ action: 'report', target: user, quantity: limit }));
-            document.getElementById('result').innerText = '✅ Datos enviados al bot.';
+            const data = JSON.stringify({
+                action: 'command',
+                command: command + ' ' + arg
+            });
+            tg.sendData(data);
+            showStatus('monitor-status', 'info', '⏳ Ejecutando ' + command + '...');
         }
+
+        function sendReport() {
+            const target = document.getElementById('report-target').value.trim();
+            const ids = document.getElementById('report-ids').value.trim();
+            const quantity = document.getElementById('report-quantity').value.trim();
+
+            if (!target) {
+                showStatus('report-status', 'error', '❌ Ingresa un usuario o enlace.');
+                return;
+            }
+            if (!ids) {
+                showStatus('report-status', 'error', '❌ Ingresa al menos un ID de mensaje.');
+                return;
+            }
+            if (!quantity || quantity < 1 || quantity > 200) {
+                showStatus('report-status', 'error', '❌ La cantidad debe estar entre 1 y 200.');
+                return;
+            }
+
+            const command = '/report ' + target + ' ' + ids + ' ' + quantity;
+            const data = JSON.stringify({
+                action: 'command',
+                command: command
+            });
+            tg.sendData(data);
+            showStatus('report-status', 'success', '✅ Reporte enviado al bot: ' + command);
+        }
+
+        tg.onEvent('viewportChanged', ({ isStateStable }) => {
+            if (isStateStable) {
+                document.body.style.height = window.innerHeight + 'px';
+            }
+        });
+
+        if (user.id) {
+            document.querySelector('#user-stats .stat-item:nth-child(1) .stat-value').textContent = user.id;
+        }
+
+        console.log('Mini App GhostReports cargada correctamente.');
     </script>
 </body>
 </html>
