@@ -638,8 +638,15 @@
                 let html = '<ul style="list-style:none;padding:0;">';
                 links.forEach(l => {
                     const emoji = { active: '🟢', banned: '🔴', not_found: '❌', private: '🔒', unknown: '❓' }[l.status] || '❓';
+                    // Construir enlace completo: si el link empieza con @, lo convertimos en https://t.me/...
+                    let fullLink = l.link;
+                    if (l.link.startsWith('@')) {
+                        fullLink = `https://t.me/${l.link.substring(1)}`;
+                    } else if (!l.link.startsWith('http')) {
+                        fullLink = `https://t.me/${l.link}`;
+                    }
                     html += `<li style="margin-bottom:8px;padding:8px;background:var(--bg);border-radius:8px;">
-                        <span>${emoji}</span> <code style="color:var(--text)">${l.link}</code>
+                        <span>${emoji}</span> <a href="${fullLink}" target="_blank" style="color:var(--accent);text-decoration:none;">${l.link}</a>
                         <div style="font-size:11px;color:var(--text-secondary);">Estado: ${l.status} | Última revisión: ${l.last_check || 'N/A'}</div>
                     </li>`;
                 });
@@ -651,6 +658,8 @@
             }
         }
 
+
+        
         async function loadBannedHistory() {
             const userId = user.id;
             if (!userId) return;
