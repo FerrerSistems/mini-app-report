@@ -298,13 +298,13 @@
             }
         }
 
-        // Mostrar resultado
+        // Mostrar resultado en caja
         function showResult(elementId, html) {
             const el = document.getElementById(elementId);
             if (!el) return;
             el.style.display = 'block';
             el.innerHTML = html;
-            // Añadir botones de copiar a cada <code>
+            // Botones de copiar para cada <code>
             const codes = el.querySelectorAll('code');
             codes.forEach(code => {
                 if (!code.nextElementSibling || !code.nextElementSibling.classList.contains('copy-btn')) {
@@ -334,7 +334,7 @@
             return `<div style="color:var(--accent);">✅ ${message}</div>`;
         }
 
-        // Renderizar respuesta (mensajes + teclado inline)
+        // Renderiza mensajes + teclado inline
         function renderResponse(resultElementId, data) {
             let html = '';
             if (data.messages && data.messages.length > 0) {
@@ -401,7 +401,7 @@
             sendCommand('/report ' + target + ' ' + ids + ' ' + quantity, 'report-result');
         }
 
-        // Enviar callback (botones inline)
+        // Enviar callback inline
         async function sendCallback(callbackData, resultElementId) {
             const userId = user.id;
             if (!userId) return;
