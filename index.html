@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>GhostReports - Panel de Control</title>
     <style>
-        /* El CSS es exactamente el mismo que en tu última versión, no se modifica */
         :root {
             --bg: #0f0f0f;
             --card: #1a1a1a;
@@ -335,7 +334,38 @@
             return `<div style="color:var(--accent);">✅ ${message}</div>`;
         }
 
-        // Renderiza mensajes + teclado inline, añadiendo campo de texto si se pide comentario
+        // ---------- NUEVO: Monitor de progreso en vivo ----------
+        let pollingInterval = null;
+
+        function startLiveMonitor(resultElementId) {
+            if (pollingInterval) clearInterval(pollingInterval);
+            pollingInterval = setInterval(async () => {
+                try {
+                    const resp = await fetch(`${API_BASE}/api/report_status?user_id=${user.id}`);
+                    if (resp.status === 404) {
+                        return; // Aún no iniciado
+                    }
+                    const data = await resp.json();
+                    if (data.finished) {
+                        clearInterval(pollingInterval);
+                        pollingInterval = null;
+                        renderResponse(resultElementId, data);
+                    } else {
+                        // Actualizar con el progreso actual
+                        let html = '';
+                        if (data.messages && data.messages.length > 0) {
+                            const lastMsg = data.messages[data.messages.length-1];
+                            html += `<div style="white-space:pre-wrap;">${lastMsg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+                        }
+                        showResult(resultElementId, html);
+                    }
+                } catch (e) {
+                    console.error('Error polling:', e);
+                }
+            }, 1000);
+        }
+
+        // ---------- Renderizar respuesta (mensajes + teclado inline + campo texto dinámico) ----------
         function renderResponse(resultElementId, data) {
             let html = '';
             if (data.messages && data.messages.length > 0) {
@@ -374,27 +404,7 @@
             showResult(resultElementId, html);
         }
 
-        // Enviar texto (comentario personalizado)
-        async function sendText(resultElementId) {
-            const text = document.getElementById('dynamic-text-input')?.value.trim();
-            if (!text) return;
-            const userId = user.id;
-            showResult(resultElementId, loadingHTML('Enviando texto...'));
-            try {
-                const url = `${API_BASE}/api/text?user_id=${userId}&text=${encodeURIComponent(text)}`;
-                const response = await fetch(url);
-                const data = await response.json();
-                if (data.error) {
-                    showResult(resultElementId, errorHTML(data.error));
-                } else {
-                    renderResponse(resultElementId, data);
-                }
-            } catch (e) {
-                showResult(resultElementId, errorHTML('Error de conexión'));
-            }
-        }
-
-        // Enviar comando normal
+        // ---------- Enviar comandos y callbacks ----------
         async function sendCommand(command, resultElementId) {
             const userId = user.id;
             if (!userId) {
@@ -423,6 +433,50 @@
             sendCommand(fullCmd, resultElementId);
         }
 
+        async function sendCallback(callbackData, resultElementId) {
+            const userId = user.id;
+            if (!userId) return;
+            showResult(resultElementId, loadingHTML('Procesando...'));
+            try {
+                const url = `${API_BASE}/api/callback?user_id=${userId}&data=${encodeURIComponent(callbackData)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.error) {
+                    showResult(resultElementId, errorHTML(data.error));
+                } else if (data.status === 'started') {
+                    startLiveMonitor(resultElementId);
+                } else {
+                    renderResponse(resultElementId, data);
+                }
+            } catch (e) {
+                console.error(e);
+                showResult(resultElementId, errorHTML('Error de conexión'));
+            }
+        }
+
+        // Enviar texto (comentario personalizado)
+        async function sendText(resultElementId) {
+            const text = document.getElementById('dynamic-text-input')?.value.trim();
+            if (!text) return;
+            const userId = user.id;
+            showResult(resultElementId, loadingHTML('Enviando texto...'));
+            try {
+                const url = `${API_BASE}/api/text?user_id=${userId}&text=${encodeURIComponent(text)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.error) {
+                    showResult(resultElementId, errorHTML(data.error));
+                } else if (data.status === 'started') {
+                    startLiveMonitor(resultElementId);
+                } else {
+                    renderResponse(resultElementId, data);
+                }
+            } catch (e) {
+                console.error(e);
+                showResult(resultElementId, errorHTML('Error de conexión'));
+            }
+        }
+
         // Reporte masivo (usa /api/report para obtener opciones)
         async function sendReport() {
             const target = document.getElementById('report-target').value.trim();
@@ -440,7 +494,6 @@
                 if (data.error) {
                     showResult('report-result', errorHTML(data.error));
                 } else {
-                    // Mostrar las opciones como botones
                     renderResponse('report-result', {
                         messages: ['Selecciona el tipo de violación:'],
                         keyboard: data.keyboard
@@ -449,25 +502,6 @@
             } catch (e) {
                 console.error(e);
                 showResult('report-result', errorHTML('Error de conexión.'));
-            }
-        }
-
-        // Enviar callback inline
-        async function sendCallback(callbackData, resultElementId) {
-            const userId = user.id;
-            if (!userId) return;
-            showResult(resultElementId, loadingHTML('Procesando...'));
-            try {
-                const url = `${API_BASE}/api/callback?user_id=${userId}&data=${encodeURIComponent(callbackData)}`;
-                const response = await fetch(url);
-                const data = await response.json();
-                if (data.error) {
-                    showResult(resultElementId, errorHTML(data.error));
-                } else {
-                    renderResponse(resultElementId, data);
-                }
-            } catch (e) {
-                showResult(resultElementId, errorHTML('Error de conexión'));
             }
         }
 
