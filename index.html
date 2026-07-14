@@ -390,6 +390,7 @@
             sendCommand(fullCmd, resultElementId);
         }
 
+        // Reporte masivo (usa /api/report para obtener opciones)
         async function sendReport() {
             const target = document.getElementById('report-target').value.trim();
             const ids = document.getElementById('report-ids').value.trim();
@@ -398,7 +399,24 @@
                 showResult('report-result', errorHTML('Completa todos los campos.'));
                 return;
             }
-            sendCommand('/report ' + target + ' ' + ids + ' ' + quantity, 'report-result');
+            showResult('report-result', loadingHTML('Obteniendo opciones...'));
+            try {
+                const url = `${API_BASE}/api/report?target=${encodeURIComponent(target)}&ids=${encodeURIComponent(ids)}&user_id=${user.id}&quantity=${quantity}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.error) {
+                    showResult('report-result', errorHTML(data.error));
+                } else {
+                    // Mostrar las opciones como botones
+                    renderResponse('report-result', {
+                        messages: ['Selecciona el tipo de violación:'],
+                        keyboard: data.keyboard
+                    });
+                }
+            } catch (e) {
+                console.error(e);
+                showResult('report-result', errorHTML('Error de conexión.'));
+            }
         }
 
         // Enviar callback inline
