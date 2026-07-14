@@ -146,7 +146,7 @@
                 <label class="form-label">Usuario / Canal</label>
                 <input type="text" class="form-input" id="getidpin-target" placeholder="@canal o ID numérico">
             </div>
-            <button class="btn btn-primary" onclick="sendCustomCommand('/getidpin', ['getidpin-target'], 'getidpin-result')">📌 Obtener Pines</button>
+            <button class="btn btn-primary" onclick="sendPinnedCommand()">📌 Obtener Pines</button>
             <div class="result-box" id="getidpin-result"></div>
         </div>
 
@@ -417,6 +417,35 @@
                 }
             } catch (e) {
                 showResult(resultElementId, errorHTML('Error de conexión'));
+            }
+        }
+
+        // Pinned IDs (usando endpoint dedicado)
+        async function sendPinnedCommand() {
+            const target = document.getElementById('getidpin-target').value.trim();
+            if (!target) {
+                showResult('getidpin-result', errorHTML('Ingresa un usuario o canal.'));
+                return;
+            }
+            showResult('getidpin-result', loadingHTML('Obteniendo mensajes fijados...'));
+            try {
+                const url = `${API_BASE}/api/pinned?target=${encodeURIComponent(target)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.error) {
+                    showResult('getidpin-result', errorHTML(data.error));
+                } else {
+                    const ids = data.ids || [];
+                    if (ids.length === 0) {
+                        showResult('getidpin-result', successHTML('No hay mensajes fijados.'));
+                    } else {
+                        const idsText = ids.join(', ');
+                        showResult('getidpin-result', `<div>📌 <b>Mensajes fijados (${ids.length}):</b></div><code>${idsText}</code>`);
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+                showResult('getidpin-result', errorHTML('Error de conexión'));
             }
         }
 
