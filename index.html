@@ -367,6 +367,16 @@
 
         // ---------- Renderizar respuesta (mensajes + teclado inline + campo texto dinámico) ----------
         function renderResponse(resultElementId, data) {
+            // Si ya hay un monitor en vivo corriendo, no hacemos nada (para evitar borrar la vista en vivo)
+            if (pollingInterval) return;
+
+            // Si el mensaje indica que el reporte está iniciando o ya en proceso, activamos el monitor y salimos
+            const lastMsg = data.messages && data.messages.length > 0 ? data.messages[data.messages.length-1] : '';
+            if (/⏳ Iniciando reportes|Iniciando workers|REPORTE EN PROGRESO/i.test(lastMsg)) {
+                startLiveMonitor(resultElementId);
+                return;
+            }
+
             let html = '';
             if (data.messages && data.messages.length > 0) {
                 html += data.messages.map(msg => `<div style="margin-bottom:8px;">${msg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`).join('');
@@ -375,7 +385,6 @@
             }
 
             // Detectar si hay que mostrar el campo de texto para comentarios
-            const lastMsg = data.messages && data.messages.length > 0 ? data.messages[data.messages.length-1] : '';
             const hasMultiKeyboard = data.keyboard && data.keyboard.some(row => row.some(btn => btn.callback_data && (btn.callback_data === 'multi_add' || btn.callback_data === 'multi_start')));
             if (/envía tu primer comentario|envía otro comentario|Comentario #\d+ guardado|agregar otro comentario/i.test(lastMsg) || hasMultiKeyboard) {
                 html += `
