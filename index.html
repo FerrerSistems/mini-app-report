@@ -374,10 +374,10 @@
                 html += successHTML('Comando ejecutado');
             }
 
-            // Detectar si el mensaje pide un texto (comentario personalizado o multi comentarios)
+            // Detectar si hay que mostrar el campo de texto para comentarios
             const lastMsg = data.messages && data.messages.length > 0 ? data.messages[data.messages.length-1] : '';
-            // Multi comentarios: "Envía tu primer comentario", "Envía otro comentario", etc.
-            if (/envía tu primer comentario|envía otro comentario|agregar otro comentario/i.test(lastMsg)) {
+            const hasMultiKeyboard = data.keyboard && data.keyboard.some(row => row.some(btn => btn.callback_data && (btn.callback_data === 'multi_add' || btn.callback_data === 'multi_start')));
+            if (/envía tu primer comentario|envía otro comentario|Comentario #\d+ guardado|agregar otro comentario/i.test(lastMsg) || hasMultiKeyboard) {
                 html += `
                     <div style="margin-top:12px;">
                         <textarea id="dynamic-text-input" class="form-textarea" placeholder="Escribe tu comentario (máx 500 caracteres)..." style="min-height:60px;"></textarea>
