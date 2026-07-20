@@ -404,12 +404,14 @@
                 `;
             }
 
-            // Teclado inline
+            // Teclado inline (sin el botón "Agregar otro comentario")
             if (data.keyboard && Array.isArray(data.keyboard)) {
                 html += '<div style="margin-top:12px;display:flex;flex-direction:column;gap:4px;">';
                 data.keyboard.forEach(row => {
                     html += '<div style="display:flex;gap:4px;">';
                     row.forEach(btn => {
+                        // Saltar el botón que agrega otro comentario (multi_add)
+                        if (btn.callback_data === 'multi_add') return;
                         if (btn.url) {
                             html += `<a href="${btn.url}" target="_blank" class="btn btn-outline" style="flex:1;">${btn.text}</a>`;
                         } else if (btn.callback_data) {
