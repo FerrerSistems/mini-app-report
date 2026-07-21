@@ -334,46 +334,75 @@
             return `<div style="color:var(--accent);">✅ ${message}</div>`;
         }
 
-        // ---------- NUEVO: Monitor de progreso en vivo ----------
+        // ---------- Monitor de progreso en vivo ----------
         let pollingInterval = null;
 
-        function startLiveMonitor(resultElementId) {
-            if (pollingInterval) clearInterval(pollingInterval);
+        function stopLiveMonitor() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+        }
+
+        function startLiveMonitor(resultElementId, initialMessage = null) {
+            stopLiveMonitor();
+            // Si se proporciona un mensaje inicial, lo mostramos inmediatamente
+            if (initialMessage) {
+                showResult(resultElementId, `<div style="white-space:pre-wrap;">${initialMessage.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`);
+            }
             pollingInterval = setInterval(async () => {
                 try {
                     const resp = await fetch(`${API_BASE}/api/report_status?user_id=${user.id}`);
                     if (resp.status === 404) {
-                        return; // Aún no iniciado
+                        // Aún no iniciado, mantenemos el mensaje inicial (si lo hay) o un loading
+                        if (!initialMessage) {
+                            showResult(resultElementId, loadingHTML('Esperando inicio del reporte'));
+                        }
+                        return;
                     }
                     const data = await resp.json();
                     if (data.finished) {
-                        clearInterval(pollingInterval);
-                        pollingInterval = null;
+                        stopLiveMonitor();
                         renderResponse(resultElementId, data);
                     } else {
-                        // Actualizar con el progreso actual
                         let html = '';
                         if (data.messages && data.messages.length > 0) {
                             const lastMsg = data.messages[data.messages.length-1];
-                            html += `<div style="white-space:pre-wrap;">${lastMsg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+                            html = `<div style="white-space:pre-wrap;">${lastMsg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+                        } else {
+                            // Mantenemos el último contenido mostrado, no lo vaciamos
+                            html = document.getElementById(resultElementId)?.innerHTML || loadingHTML('Procesando reportes...');
                         }
                         showResult(resultElementId, html);
                     }
                 } catch (e) {
                     console.error('Error polling:', e);
+                    // No vaciar, mantener el último estado
                 }
-            }, 1000);
+            }, 1500);
         }
 
         // ---------- Renderizar respuesta (mensajes + teclado inline + campo texto dinámico) ----------
         function renderResponse(resultElementId, data) {
-            // Si ya hay un monitor en vivo corriendo, no hacemos nada (para evitar borrar la vista en vivo)
-            if (pollingInterval) return;
+            stopLiveMonitor(); // por si acaso había un monitor corriendo
 
-            // Si el mensaje indica que el reporte está iniciando o ya en proceso, activamos el monitor y salimos
+            // Si la respuesta indica finalización forzosa (cancelación, etc.)
+            if (data.finished) {
+                let html = '';
+                if (data.messages && data.messages.length > 0) {
+                    html += data.messages.map(msg => `<div style="margin-bottom:8px;">${msg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`).join('');
+                } else {
+                    html += successHTML('Operación finalizada.');
+                }
+                showResult(resultElementId, html);
+                return;
+            }
+
             const lastMsg = data.messages && data.messages.length > 0 ? data.messages[data.messages.length-1] : '';
+
+            // Si el último mensaje indica que el reporte arrancó, iniciamos el monitor pasando ese mensaje
             if (/⏳ Iniciando reportes|Iniciando workers|REPORTE EN PROGRESO/i.test(lastMsg)) {
-                startLiveMonitor(resultElementId);
+                startLiveMonitor(resultElementId, lastMsg);
                 return;
             }
 
@@ -384,7 +413,7 @@
                 html += successHTML('Comando ejecutado');
             }
 
-            // Detectar si hay que mostrar el campo de texto para comentarios
+            // Detectar si hay que mostrar campo de texto para comentarios
             const hasMultiKeyboard = data.keyboard && data.keyboard.some(row => row.some(btn => btn.callback_data && (btn.callback_data === 'multi_add' || btn.callback_data === 'multi_start')));
             if (/envía tu primer comentario|envía otro comentario|Comentario #\d+ guardado|agregar otro comentario/i.test(lastMsg) || hasMultiKeyboard) {
                 html += `
@@ -464,8 +493,19 @@
                 const data = await response.json();
                 if (data.error) {
                     showResult(resultElementId, errorHTML(data.error));
+                } else if (data.finished) {
+                    stopLiveMonitor();
+                    let html = '';
+                    if (data.messages && data.messages.length > 0) {
+                        html += data.messages.map(msg => `<div style="margin-bottom:8px;">${msg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`).join('');
+                    } else {
+                        html += successHTML('Operación cancelada.');
+                    }
+                    showResult(resultElementId, html);
                 } else if (data.status === 'started') {
-                    startLiveMonitor(resultElementId);
+                    // Mostrar el último mensaje si viene en la respuesta, antes de arrancar el monitor
+                    const lastMsg = (data.messages && data.messages.length > 0) ? data.messages[data.messages.length-1] : null;
+                    startLiveMonitor(resultElementId, lastMsg);
                 } else {
                     renderResponse(resultElementId, data);
                 }
@@ -487,8 +527,18 @@
                 const data = await response.json();
                 if (data.error) {
                     showResult(resultElementId, errorHTML(data.error));
+                } else if (data.finished) {
+                    stopLiveMonitor();
+                    let html = '';
+                    if (data.messages && data.messages.length > 0) {
+                        html += data.messages.map(msg => `<div style="margin-bottom:8px;">${msg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`).join('');
+                    } else {
+                        html += successHTML('Operación finalizada.');
+                    }
+                    showResult(resultElementId, html);
                 } else if (data.status === 'started') {
-                    startLiveMonitor(resultElementId);
+                    const lastMsg = (data.messages && data.messages.length > 0) ? data.messages[data.messages.length-1] : null;
+                    startLiveMonitor(resultElementId, lastMsg);
                 } else {
                     renderResponse(resultElementId, data);
                 }
