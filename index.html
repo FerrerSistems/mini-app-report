@@ -334,7 +334,7 @@
             return `<div style="color:var(--accent);">✅ ${message}</div>`;
         }
 
-        // ---------- NUEVO: Monitor de progreso en vivo ----------
+        // ---------- Monitor de progreso en vivo ----------
         let pollingInterval = null;
 
         function startLiveMonitor(resultElementId) {
@@ -365,10 +365,30 @@
             }, 1000);
         }
 
+        function stopLiveMonitor() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+        }
+
         // ---------- Renderizar respuesta (mensajes + teclado inline + campo texto dinámico) ----------
         function renderResponse(resultElementId, data) {
             // Si ya hay un monitor en vivo corriendo, no hacemos nada (para evitar borrar la vista en vivo)
             if (pollingInterval) return;
+
+            // Si la respuesta indica que el proceso ha terminado (cancelación), limpiamos y mostramos mensaje final
+            if (data.finished) {
+                stopLiveMonitor();
+                let html = '';
+                if (data.messages && data.messages.length > 0) {
+                    html += data.messages.map(msg => `<div style="margin-bottom:8px;">${msg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`).join('');
+                } else {
+                    html += successHTML('Operación finalizada.');
+                }
+                showResult(resultElementId, html);
+                return;
+            }
 
             // Si el mensaje indica que el reporte está iniciando o ya en proceso, activamos el monitor y salimos
             const lastMsg = data.messages && data.messages.length > 0 ? data.messages[data.messages.length-1] : '';
@@ -466,6 +486,16 @@
                     showResult(resultElementId, errorHTML(data.error));
                 } else if (data.status === 'started') {
                     startLiveMonitor(resultElementId);
+                } else if (data.finished) {
+                    // Cancelación u otra finalización
+                    stopLiveMonitor();
+                    let html = '';
+                    if (data.messages && data.messages.length > 0) {
+                        html += data.messages.map(msg => `<div style="margin-bottom:8px;">${msg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`).join('');
+                    } else {
+                        html += successHTML('Operación cancelada.');
+                    }
+                    showResult(resultElementId, html);
                 } else {
                     renderResponse(resultElementId, data);
                 }
@@ -489,6 +519,15 @@
                     showResult(resultElementId, errorHTML(data.error));
                 } else if (data.status === 'started') {
                     startLiveMonitor(resultElementId);
+                } else if (data.finished) {
+                    stopLiveMonitor();
+                    let html = '';
+                    if (data.messages && data.messages.length > 0) {
+                        html += data.messages.map(msg => `<div style="margin-bottom:8px;">${msg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`).join('');
+                    } else {
+                        html += successHTML('Operación finalizada.');
+                    }
+                    showResult(resultElementId, html);
                 } else {
                     renderResponse(resultElementId, data);
                 }
