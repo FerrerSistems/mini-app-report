@@ -71,8 +71,29 @@
         .status.error { display:block; background:rgba(255,82,82,0.1); border:1px solid rgba(255,82,82,0.3); color:#ff5252; }
         .status.info { display:block; background:rgba(64,196,255,0.1); border:1px solid rgba(64,196,255,0.3); color:#40c4ff; }
 
-        .tabs { display:flex; gap:4px; margin-bottom:16px; background:var(--card); border-radius:12px; padding:4px; }
-        .tab { flex:1; padding:10px; text-align:center; border-radius:10px; font-size:13px; font-weight:500; cursor:pointer; color:var(--text-secondary); transition:all 0.2s; }
+        .tabs { 
+            display:flex; 
+            gap:4px; 
+            margin-bottom:16px; 
+            background:var(--card); 
+            border-radius:12px; 
+            padding:4px; 
+            overflow-x: auto; 
+            white-space: nowrap; 
+            -webkit-overflow-scrolling: touch;
+        }
+        .tab { 
+            flex: 0 0 auto; 
+            padding:10px 14px; 
+            text-align:center; 
+            border-radius:10px; 
+            font-size:13px; 
+            font-weight:500; 
+            cursor:pointer; 
+            color:var(--text-secondary); 
+            transition:all 0.2s; 
+            user-select: none;
+        }
         .tab.active { background:var(--bg); color:var(--text); font-weight:600; }
 
         .result-box { background:var(--bg); border-radius:12px; padding:12px; margin-top:12px; font-size:13px; max-height:400px; overflow-y:auto; word-break:break-word; display:none; border:1px solid var(--border); }
@@ -104,24 +125,171 @@
         <div class="tab" onclick="switchTab('buy')">💰 Comprar</div>
     </div>
 
-    <!-- Tab Reportes (sin cambios) -->
+    <!-- Tab Reportes -->
     <div id="tab-report" class="tab-content">
-        <!-- contenido existente... -->
-        <!-- (Aquí irían todas las tarjetas de reportes, getids, photo, history, bot, join/leave) -->
-        <!-- Se mantienen exactamente igual que en tu HTML original -->
+        <!-- Reporte masivo -->
+        <div class="card">
+            <div class="card-title"><div class="icon icon-report">📊</div> Reporte Masivo</div>
+            <div class="form-group">
+                <label class="form-label">Usuario o Enlace</label>
+                <input type="text" class="form-input" id="report-target" placeholder="@usuario o https://t.me/...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">IDs de Mensajes</label>
+                <input type="text" class="form-input" id="report-ids" placeholder="123, 456, 789">
+                <span class="form-hint">Separa los IDs con comas o espacios</span>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Cantidad de Reportes (1-200)</label>
+                <input type="number" class="form-input" id="report-quantity" value="10" min="1" max="200">
+            </div>
+            <button class="btn btn-primary" onclick="sendReport()">🚀 Enviar Reporte</button>
+            <div class="result-box" id="report-result"></div>
+        </div>
+
+        <!-- Get IDs -->
+        <div class="card">
+            <div class="card-title"><div class="icon icon-action">🆔</div> Get IDs</div>
+            <div class="form-group">
+                <label class="form-label">Usuario / Canal</label>
+                <input type="text" class="form-input" id="getids-target" placeholder="@canal o ID numérico">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Límite (opcional, máx 200)</label>
+                <input type="number" class="form-input" id="getids-limit" placeholder="100" min="1" max="200">
+            </div>
+            <button class="btn btn-primary" onclick="sendCustomCommand('/getids', ['getids-target','getids-limit'], 'getids-result')">🆔 Obtener IDs</button>
+            <div class="result-box" id="getids-result"></div>
+        </div>
+
+        <!-- Get Pinned IDs -->
+        <div class="card">
+            <div class="card-title"><div class="icon icon-action">📌</div> Pinned IDs</div>
+            <div class="form-group">
+                <label class="form-label">Usuario / Canal</label>
+                <input type="text" class="form-input" id="getidpin-target" placeholder="@canal o ID numérico">
+            </div>
+            <button class="btn btn-primary" onclick="sendPinnedCommand()">📌 Obtener Pines</button>
+            <div class="result-box" id="getidpin-result"></div>
+        </div>
+
+        <!-- Photo -->
+        <div class="card">
+            <div class="card-title"><div class="icon icon-action">📸</div> Reportar Foto</div>
+            <div class="form-group">
+                <label class="form-label">Usuario</label>
+                <input type="text" class="form-input" id="photo-target" placeholder="@usuario">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Cantidad (1-200)</label>
+                <input type="number" class="form-input" id="photo-quantity" value="10" min="1" max="200">
+            </div>
+            <button class="btn btn-primary" onclick="sendCustomCommand('/photo', ['photo-target','photo-quantity'], 'photo-result')">📸 Reportar Foto</button>
+            <div class="result-box" id="photo-result"></div>
+        </div>
+
+        <!-- History -->
+        <div class="card">
+            <div class="card-title"><div class="icon icon-action">📖</div> Reportar Historia</div>
+            <div class="form-group">
+                <label class="form-label">Usuario</label>
+                <input type="text" class="form-input" id="history-target" placeholder="@usuario">
+            </div>
+            <div class="form-group">
+                <label class="form-label">IDs de Historias (separados por coma)</label>
+                <input type="text" class="form-input" id="history-ids" placeholder="2,3,4">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Cantidad (1-200)</label>
+                <input type="number" class="form-input" id="history-quantity" value="10" min="1" max="200">
+            </div>
+            <button class="btn btn-primary" onclick="sendCustomCommand('/history', ['history-target','history-ids','history-quantity'], 'history-result')">📖 Reportar Historia</button>
+            <div class="result-box" id="history-result"></div>
+        </div>
+
+        <!-- Bot -->
+        <div class="card">
+            <div class="card-title"><div class="icon icon-action">🤖</div> Reportar Bot</div>
+            <div class="form-group">
+                <label class="form-label">Nombre del Bot (@...)</label>
+                <input type="text" class="form-input" id="bot-target" placeholder="@bot">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Cantidad (1-200)</label>
+                <input type="number" class="form-input" id="bot-quantity" value="10" min="1" max="200">
+            </div>
+            <button class="btn btn-primary" onclick="sendCustomCommand('/bot', ['bot-target','bot-quantity'], 'bot-result')">🤖 Reportar Bot</button>
+            <div class="result-box" id="bot-result"></div>
+        </div>
+
+        <!-- Join / Leave -->
+        <div class="card">
+            <div class="card-title"><div class="icon icon-action">🔗</div> Unirse / Salir</div>
+            <div class="form-group">
+                <label class="form-label">Usuario / Enlace</label>
+                <input type="text" class="form-input" id="joinleave-target" placeholder="@canal o https://t.me/...">
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="sendCustomCommand('/join', ['joinleave-target'], 'joinleave-result')">🔗 Unirse</button>
+                <button class="btn btn-danger" onclick="sendCustomCommand('/leave', ['joinleave-target'], 'joinleave-result')">🚪 Salir</button>
+            </div>
+            <div class="result-box" id="joinleave-result"></div>
+        </div>
     </div>
 
-    <!-- Tab Monitoreo (sin cambios) -->
+    <!-- Tab Monitoreo -->
     <div id="tab-monitor" class="tab-content" style="display:none;">
-        <!-- contenido existente... -->
+        <div class="card">
+            <div class="card-title"><div class="icon icon-monitor">🔍</div> Mi Lista de Monitoreo</div>
+            <div id="monitor-list" class="list-container"></div>
+            <button class="btn btn-outline" onclick="loadMonitorList()">🔄 Actualizar Lista</button>
+        </div>
+        <div class="card">
+            <div class="card-title"><div class="icon icon-monitor">🚫</div> Historial de Baneados</div>
+            <div id="banned-list" class="list-container"></div>
+            <button class="btn btn-outline" onclick="loadBannedHistory()">🔄 Actualizar Historial</button>
+        </div>
+        <div class="card">
+            <div class="card-title"><div class="icon icon-monitor">➕</div> Agregar / Eliminar</div>
+            <div class="form-group">
+                <label class="form-label">Usuario o Enlace</label>
+                <input type="text" class="form-input" id="monitor-target" placeholder="@usuario o enlace">
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="sendMonitorAdd()">➕ Agregar</button>
+                <button class="btn btn-danger" onclick="sendMonitorRemove()">🗑️ Eliminar</button>
+            </div>
+            <div class="result-box" id="monitor-result"></div>
+        </div>
     </div>
 
-    <!-- Tab Mi Cuenta (sin cambios) -->
+    <!-- Tab Mi Cuenta -->
     <div id="tab-me" class="tab-content" style="display:none;">
-        <!-- contenido existente... -->
+        <div class="card">
+            <div class="card-title"><div class="icon icon-stats">👤</div> Mi Cuenta</div>
+            <div class="stats-grid" id="user-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-id">--</div>
+                    <div class="stat-label">ID de Usuario</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-remaining">--</div>
+                    <div class="stat-label">Acceso Restante</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-sessions">--</div>
+                    <div class="stat-label">Sesiones Activas</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-links">--</div>
+                    <div class="stat-label">Links Monitoreados</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="refreshStats()">🔄 Actualizar Estadísticas</button>
+        </div>
     </div>
 
-    <!-- Nueva Tab Comprar -->
+    <!-- Tab Comprar -->
     <div id="tab-buy" class="tab-content" style="display:none;">
         <div class="card">
             <div class="card-title"><div class="icon icon-buy">💎</div> Planes de Acceso</div>
@@ -155,8 +323,450 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        // ... (todo el JavaScript existente sin cambios) ...
-        // La función switchTab ya maneja el nuevo tab "buy" sin modificaciones.
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        tg.setHeaderColor('#0f0f0f');
+        tg.setBackgroundColor('#0f0f0f');
+        const user = tg.initDataUnsafe?.user || {};
+        const API_BASE = 'https://report-production-d6d6.up.railway.app';
+
+        console.log('[MiniApp] API_BASE:', API_BASE);
+        console.log('[MiniApp] Usuario:', user);
+
+        // Copiar al portapapeles
+        function copyToClipboard(text) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).catch(e => console.error(e));
+            } else {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            }
+        }
+
+        // Mostrar resultado en caja
+        function showResult(elementId, html) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            el.style.display = 'block';
+            el.innerHTML = html;
+            const codes = el.querySelectorAll('code');
+            codes.forEach(code => {
+                if (!code.nextElementSibling || !code.nextElementSibling.classList.contains('copy-btn')) {
+                    const btn = document.createElement('button');
+                    btn.className = 'copy-btn';
+                    btn.textContent = 'Copiar';
+                    btn.onclick = () => copyToClipboard(code.textContent);
+                    code.parentNode.insertBefore(btn, code.nextSibling);
+                }
+            });
+        }
+
+        function hideResult(elementId) {
+            const el = document.getElementById(elementId);
+            if (el) el.style.display = 'none';
+        }
+
+        function loadingHTML(message) {
+            return `<div class="loading-spinner">⏳ ${message}...</div>`;
+        }
+
+        function errorHTML(message) {
+            return `<div style="color:var(--danger);">❌ ${message}</div>`;
+        }
+
+        function successHTML(message) {
+            return `<div style="color:var(--accent);">✅ ${message}</div>`;
+        }
+
+        // ---------- Monitor de progreso en vivo ----------
+        let pollingInterval = null;
+
+        function stopLiveMonitor() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+        }
+
+        function startLiveMonitor(resultElementId, initialMessage = null) {
+            stopLiveMonitor();
+            if (initialMessage) {
+                showResult(resultElementId, `<div style="white-space:pre-wrap;">${initialMessage.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`);
+            }
+            pollingInterval = setInterval(async () => {
+                try {
+                    const resp = await fetch(`${API_BASE}/api/report_status?user_id=${user.id}`);
+                    if (resp.status === 404) {
+                        if (!initialMessage) {
+                            showResult(resultElementId, loadingHTML('Esperando inicio del reporte'));
+                        }
+                        return;
+                    }
+                    const data = await resp.json();
+                    if (data.finished) {
+                        stopLiveMonitor();
+                        renderResponse(resultElementId, data);
+                    } else {
+                        let html = '';
+                        if (data.messages && data.messages.length > 0) {
+                            const lastMsg = data.messages[data.messages.length-1];
+                            html = `<div style="white-space:pre-wrap;">${lastMsg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+                        } else {
+                            html = document.getElementById(resultElementId)?.innerHTML || loadingHTML('Procesando reportes...');
+                        }
+                        showResult(resultElementId, html);
+                    }
+                } catch (e) {
+                    console.error('Error polling:', e);
+                }
+            }, 1500);
+        }
+
+        // ---------- Renderizar respuesta ----------
+        function renderResponse(resultElementId, data) {
+            stopLiveMonitor();
+            if (data.finished) {
+                let html = '';
+                if (data.messages && data.messages.length > 0) {
+                    html += data.messages.map(msg => `<div style="margin-bottom:8px;">${msg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`).join('');
+                } else {
+                    html += successHTML('Operación finalizada.');
+                }
+                showResult(resultElementId, html);
+                return;
+            }
+
+            const lastMsg = data.messages && data.messages.length > 0 ? data.messages[data.messages.length-1] : '';
+            if (/⏳ Iniciando reportes|Iniciando workers|REPORTE EN PROGRESO/i.test(lastMsg)) {
+                startLiveMonitor(resultElementId, lastMsg);
+                return;
+            }
+
+            let html = '';
+            if (data.messages && data.messages.length > 0) {
+                html += data.messages.map(msg => `<div style="margin-bottom:8px;">${msg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`).join('');
+            } else {
+                html += successHTML('Comando ejecutado');
+            }
+
+            const hasMultiKeyboard = data.keyboard && data.keyboard.some(row => row.some(btn => btn.callback_data && (btn.callback_data === 'multi_add' || btn.callback_data === 'multi_start')));
+            if (/envía tu primer comentario|envía otro comentario|Comentario #\d+ guardado|agregar otro comentario/i.test(lastMsg) || hasMultiKeyboard) {
+                html += `
+                    <div style="margin-top:12px;">
+                        <textarea id="dynamic-text-input" class="form-textarea" placeholder="Escribe tu comentario (máx 500 caracteres)..." style="min-height:60px;"></textarea>
+                        <button class="btn btn-primary" onclick="sendText('${resultElementId}')">➕ Agregar comentario</button>
+                    </div>
+                `;
+            } else if (/escribe tu comentario|comentario personalizado/i.test(lastMsg)) {
+                html += `
+                    <div style="margin-top:12px;">
+                        <textarea id="dynamic-text-input" class="form-textarea" placeholder="Escribe aquí..." style="min-height:60px;"></textarea>
+                        <button class="btn btn-primary" onclick="sendText('${resultElementId}')">Enviar texto</button>
+                    </div>
+                `;
+            }
+
+            if (data.keyboard && Array.isArray(data.keyboard)) {
+                html += '<div style="margin-top:12px;display:flex;flex-direction:column;gap:4px;">';
+                data.keyboard.forEach(row => {
+                    html += '<div style="display:flex;gap:4px;">';
+                    row.forEach(btn => {
+                        if (btn.callback_data === 'multi_add') return;
+                        if (btn.url) {
+                            html += `<a href="${btn.url}" target="_blank" class="btn btn-outline" style="flex:1;">${btn.text}</a>`;
+                        } else if (btn.callback_data) {
+                            html += `<button class="btn btn-outline" style="flex:1;" onclick="sendCallback('${btn.callback_data.replace(/'/g, "\\'")}', '${resultElementId}')">${btn.text}</button>`;
+                        }
+                    });
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+            showResult(resultElementId, html);
+        }
+
+        // ---------- Enviar comandos y callbacks ----------
+        async function sendCommand(command, resultElementId) {
+            const userId = user.id;
+            if (!userId) {
+                showResult(resultElementId, errorHTML('No se pudo obtener el ID de usuario.'));
+                return;
+            }
+            showResult(resultElementId, loadingHTML('Ejecutando ' + command));
+            try {
+                const url = `${API_BASE}/api/command?user_id=${userId}&command=${encodeURIComponent(command)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.error) {
+                    showResult(resultElementId, errorHTML(data.error));
+                } else {
+                    renderResponse(resultElementId, data);
+                }
+            } catch (e) {
+                console.error(e);
+                showResult(resultElementId, errorHTML('Error de conexión.'));
+            }
+        }
+
+        function sendCustomCommand(command, inputIds, resultElementId) {
+            let args = inputIds.map(id => document.getElementById(id).value.trim()).filter(v => v);
+            const fullCmd = command + (args.length ? ' ' + args.join(' ') : '');
+            sendCommand(fullCmd, resultElementId);
+        }
+
+        async function sendCallback(callbackData, resultElementId) {
+            const userId = user.id;
+            if (!userId) return;
+            showResult(resultElementId, loadingHTML('Procesando...'));
+            try {
+                const url = `${API_BASE}/api/callback?user_id=${userId}&data=${encodeURIComponent(callbackData)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.error) {
+                    showResult(resultElementId, errorHTML(data.error));
+                } else if (data.finished) {
+                    stopLiveMonitor();
+                    let html = '';
+                    if (data.messages && data.messages.length > 0) {
+                        html += data.messages.map(msg => `<div style="margin-bottom:8px;">${msg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`).join('');
+                    } else {
+                        html += successHTML('Operación cancelada.');
+                    }
+                    showResult(resultElementId, html);
+                } else if (data.status === 'started') {
+                    const lastMsg = (data.messages && data.messages.length > 0) ? data.messages[data.messages.length-1] : null;
+                    startLiveMonitor(resultElementId, lastMsg);
+                } else {
+                    renderResponse(resultElementId, data);
+                }
+            } catch (e) {
+                console.error(e);
+                showResult(resultElementId, errorHTML('Error de conexión'));
+            }
+        }
+
+        // Enviar texto
+        async function sendText(resultElementId) {
+            const text = document.getElementById('dynamic-text-input')?.value.trim();
+            if (!text) return;
+            const userId = user.id;
+            showResult(resultElementId, loadingHTML('Enviando texto...'));
+            try {
+                const url = `${API_BASE}/api/text?user_id=${userId}&text=${encodeURIComponent(text)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.error) {
+                    showResult(resultElementId, errorHTML(data.error));
+                } else if (data.finished) {
+                    stopLiveMonitor();
+                    let html = '';
+                    if (data.messages && data.messages.length > 0) {
+                        html += data.messages.map(msg => `<div style="margin-bottom:8px;">${msg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`).join('');
+                    } else {
+                        html += successHTML('Operación finalizada.');
+                    }
+                    showResult(resultElementId, html);
+                } else if (data.status === 'started') {
+                    const lastMsg = (data.messages && data.messages.length > 0) ? data.messages[data.messages.length-1] : null;
+                    startLiveMonitor(resultElementId, lastMsg);
+                } else {
+                    renderResponse(resultElementId, data);
+                }
+            } catch (e) {
+                console.error(e);
+                showResult(resultElementId, errorHTML('Error de conexión'));
+            }
+        }
+
+        // Reporte masivo
+        async function sendReport() {
+            const target = document.getElementById('report-target').value.trim();
+            const ids = document.getElementById('report-ids').value.trim();
+            const quantity = document.getElementById('report-quantity').value.trim();
+            if (!target || !ids || !quantity) {
+                showResult('report-result', errorHTML('Completa todos los campos.'));
+                return;
+            }
+            showResult('report-result', loadingHTML('Obteniendo opciones...'));
+            try {
+                const url = `${API_BASE}/api/report?target=${encodeURIComponent(target)}&ids=${encodeURIComponent(ids)}&user_id=${user.id}&quantity=${quantity}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.error) {
+                    showResult('report-result', errorHTML(data.error));
+                } else {
+                    renderResponse('report-result', {
+                        messages: ['Selecciona el tipo de violación:'],
+                        keyboard: data.keyboard
+                    });
+                }
+            } catch (e) {
+                console.error(e);
+                showResult('report-result', errorHTML('Error de conexión.'));
+            }
+        }
+
+        // Pinned IDs
+        async function sendPinnedCommand() {
+            const target = document.getElementById('getidpin-target').value.trim();
+            if (!target) {
+                showResult('getidpin-result', errorHTML('Ingresa un usuario o canal.'));
+                return;
+            }
+            showResult('getidpin-result', loadingHTML('Obteniendo mensajes fijados...'));
+            try {
+                const url = `${API_BASE}/api/pinned?target=${encodeURIComponent(target)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.error) {
+                    showResult('getidpin-result', errorHTML(data.error));
+                } else {
+                    const ids = data.ids || [];
+                    if (ids.length === 0) {
+                        showResult('getidpin-result', successHTML('No hay mensajes fijados.'));
+                    } else {
+                        const idsText = ids.join(', ');
+                        showResult('getidpin-result', `<div>📌 <b>Mensajes fijados (${ids.length}):</b></div><code>${idsText}</code>`);
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+                showResult('getidpin-result', errorHTML('Error de conexión'));
+            }
+        }
+
+        // Monitoreo
+        async function loadMonitorList() {
+            const userId = user.id;
+            if (!userId) return;
+            try {
+                const resp = await fetch(`${API_BASE}/api/monitorlist?user_id=${userId}`);
+                const data = await resp.json();
+                const container = document.getElementById('monitor-list');
+                if (data.error) {
+                    container.innerHTML = errorHTML(data.error);
+                    return;
+                }
+                const links = data.links || [];
+                if (links.length === 0) {
+                    container.innerHTML = '<p style="color:var(--text-secondary)">No tienes usuarios en monitoreo.</p>';
+                    return;
+                }
+                let html = '<ul style="list-style:none;padding:0;">';
+                links.forEach(l => {
+                    const emoji = { active: '🟢', banned: '🔴', not_found: '❌', private: '🔒', unknown: '❓' }[l.status] || '❓';
+                    let fullLink = l.link;
+                    if (l.link.startsWith('@')) {
+                        fullLink = `https://t.me/${l.link.substring(1)}`;
+                    } else if (!l.link.startsWith('http')) {
+                        fullLink = `https://t.me/${l.link}`;
+                    }
+                    html += `<li style="margin-bottom:8px;padding:8px;background:var(--bg);border-radius:8px;">
+                        <span>${emoji}</span> <a href="${fullLink}" target="_blank" style="color:var(--accent);text-decoration:none;">${l.link}</a>
+                        <div style="font-size:11px;color:var(--text-secondary);">Estado: ${l.status} | Última revisión: ${l.last_check || 'N/A'}</div>
+                    </li>`;
+                });
+                html += '</ul>';
+                container.innerHTML = html;
+            } catch (e) {
+                console.error(e);
+                document.getElementById('monitor-list').innerHTML = errorHTML('Error de conexión');
+            }
+        }
+
+        async function loadBannedHistory() {
+            const userId = user.id;
+            if (!userId) return;
+            try {
+                const resp = await fetch(`${API_BASE}/api/monitorlistban?user_id=${userId}`);
+                const data = await resp.json();
+                const container = document.getElementById('banned-list');
+                if (data.error) {
+                    container.innerHTML = errorHTML(data.error);
+                    return;
+                }
+                const events = data.banned || [];
+                if (events.length === 0) {
+                    container.innerHTML = '<p style="color:var(--text-secondary)">Sin baneos registrados.</p>';
+                    return;
+                }
+                let html = '<ul style="list-style:none;padding:0;">';
+                events.forEach(ev => {
+                    html += `<li style="margin-bottom:8px;padding:8px;background:var(--bg);border-radius:8px;">
+                        <span>🔴</span> <code style="color:var(--text)">${ev.link}</code>
+                        <div style="font-size:11px;color:var(--text-secondary);">${ev.timestamp}</div>
+                        <div style="font-size:11px;color:var(--danger);">${ev.details}</div>
+                    </li>`;
+                });
+                html += '</ul>';
+                container.innerHTML = html;
+            } catch (e) {
+                console.error(e);
+                document.getElementById('banned-list').innerHTML = errorHTML('Error de conexión');
+            }
+        }
+
+        function sendMonitorAdd() {
+            const target = document.getElementById('monitor-target').value.trim();
+            if (!target) {
+                showResult('monitor-result', errorHTML('Ingresa un usuario o enlace.'));
+                return;
+            }
+            sendCommand('/monitoradd ' + target, 'monitor-result');
+        }
+
+        function sendMonitorRemove() {
+            const target = document.getElementById('monitor-target').value.trim();
+            if (!target) {
+                showResult('monitor-result', errorHTML('Ingresa un usuario o enlace.'));
+                return;
+            }
+            sendCommand('/monitorremove ' + target, 'monitor-result');
+        }
+
+        // Mi Cuenta
+        async function refreshStats() {
+            const userId = user.id;
+            if (!userId) return;
+            try {
+                const response = await fetch(`${API_BASE}/api/me?user_id=${userId}`);
+                const data = await response.json();
+                if (data.error) {
+                    return;
+                }
+                document.getElementById('stat-id').textContent = data.user_id;
+                document.getElementById('stat-remaining').textContent = data.remaining;
+                document.getElementById('stat-sessions').textContent = data.sessions;
+                document.getElementById('stat-links').textContent = data.links;
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            document.getElementById('tab-' + tabName).style.display = 'block';
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+            if (tabName === 'me') refreshStats();
+            if (tabName === 'monitor') {
+                loadMonitorList();
+                loadBannedHistory();
+            }
+        }
+
+        tg.onEvent('viewportChanged', ({ isStateStable }) => {
+            if (isStateStable) document.body.style.height = window.innerHeight + 'px';
+        });
+
+        if (user.id) document.getElementById('stat-id').textContent = user.id;
+
+        console.log('[MiniApp] GhostReports cargada correctamente.');
     </script>
 </body>
 </html>
