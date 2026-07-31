@@ -41,7 +41,7 @@
         .icon-monitor { background:rgba(64,196,255,0.15); color:#40c4ff; }
         .icon-stats { background:rgba(255,215,64,0.15); color:#ffd740; }
         .icon-action { background:rgba(255,82,82,0.15); color:#ff5252; }
-        .icon-buy { background:rgba(255,215,64,0.15); color:#ffd740; }
+        .icon-func { background:rgba(0,200,83,0.15); color:#00c853; }
 
         .form-group { margin-bottom:12px; }
         .form-label { display:block; font-size:12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; }
@@ -120,12 +120,13 @@
 
     <div class="tabs">
         <div class="tab active" onclick="switchTab('report')">📊 Reportes</div>
+        <div class="tab" onclick="switchTab('funciones')">🔧 Funciones</div>
         <div class="tab" onclick="switchTab('monitor')">🔍 Monitoreo</div>
         <div class="tab" onclick="switchTab('me')">👤 Mi Cuenta</div>
         <div class="tab" onclick="switchTab('buy')">💰 Comprar</div>
     </div>
 
-    <!-- Tab Reportes -->
+    <!-- Tab Reportes (solo reportes) -->
     <div id="tab-report" class="tab-content">
         <!-- Reporte masivo -->
         <div class="card">
@@ -145,32 +146,6 @@
             </div>
             <button class="btn btn-primary" onclick="sendReport()">🚀 Enviar Reporte</button>
             <div class="result-box" id="report-result"></div>
-        </div>
-
-        <!-- Get IDs -->
-        <div class="card">
-            <div class="card-title"><div class="icon icon-action">🆔</div> Get IDs</div>
-            <div class="form-group">
-                <label class="form-label">Usuario / Canal</label>
-                <input type="text" class="form-input" id="getids-target" placeholder="@canal o ID numérico">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Límite (opcional, máx 200)</label>
-                <input type="number" class="form-input" id="getids-limit" placeholder="100" min="1" max="200">
-            </div>
-            <button class="btn btn-primary" onclick="sendCustomCommand('/getids', ['getids-target','getids-limit'], 'getids-result')">🆔 Obtener IDs</button>
-            <div class="result-box" id="getids-result"></div>
-        </div>
-
-        <!-- Get Pinned IDs -->
-        <div class="card">
-            <div class="card-title"><div class="icon icon-action">📌</div> Pinned IDs</div>
-            <div class="form-group">
-                <label class="form-label">Usuario / Canal</label>
-                <input type="text" class="form-input" id="getidpin-target" placeholder="@canal o ID numérico">
-            </div>
-            <button class="btn btn-primary" onclick="sendPinnedCommand()">📌 Obtener Pines</button>
-            <div class="result-box" id="getidpin-result"></div>
         </div>
 
         <!-- Photo -->
@@ -221,10 +196,39 @@
             <button class="btn btn-primary" onclick="sendCustomCommand('/bot', ['bot-target','bot-quantity'], 'bot-result')">🤖 Reportar Bot</button>
             <div class="result-box" id="bot-result"></div>
         </div>
+    </div>
+
+    <!-- Tab Funciones (Get IDs, Pinned IDs, Join/Leave) -->
+    <div id="tab-funciones" class="tab-content" style="display:none;">
+        <!-- Get IDs -->
+        <div class="card">
+            <div class="card-title"><div class="icon icon-func">🆔</div> Get IDs</div>
+            <div class="form-group">
+                <label class="form-label">Usuario / Canal</label>
+                <input type="text" class="form-input" id="getids-target" placeholder="@canal o ID numérico">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Límite (opcional, máx 200)</label>
+                <input type="number" class="form-input" id="getids-limit" placeholder="100" min="1" max="200">
+            </div>
+            <button class="btn btn-primary" onclick="sendCustomCommand('/getids', ['getids-target','getids-limit'], 'getids-result')">🆔 Obtener IDs</button>
+            <div class="result-box" id="getids-result"></div>
+        </div>
+
+        <!-- Get Pinned IDs -->
+        <div class="card">
+            <div class="card-title"><div class="icon icon-func">📌</div> Pinned IDs</div>
+            <div class="form-group">
+                <label class="form-label">Usuario / Canal</label>
+                <input type="text" class="form-input" id="getidpin-target" placeholder="@canal o ID numérico">
+            </div>
+            <button class="btn btn-primary" onclick="sendPinnedCommand()">📌 Obtener Pines</button>
+            <div class="result-box" id="getidpin-result"></div>
+        </div>
 
         <!-- Join / Leave -->
         <div class="card">
-            <div class="card-title"><div class="icon icon-action">🔗</div> Unirse / Salir</div>
+            <div class="card-title"><div class="icon icon-func">🔗</div> Unirse / Salir</div>
             <div class="form-group">
                 <label class="form-label">Usuario / Enlace</label>
                 <input type="text" class="form-input" id="joinleave-target" placeholder="@canal o https://t.me/...">
@@ -237,7 +241,7 @@
         </div>
     </div>
 
-    <!-- Tab Monitoreo -->
+    <!-- Tab Monitoreo (sin cambios) -->
     <div id="tab-monitor" class="tab-content" style="display:none;">
         <div class="card">
             <div class="card-title"><div class="icon icon-monitor">🔍</div> Mi Lista de Monitoreo</div>
@@ -263,7 +267,7 @@
         </div>
     </div>
 
-    <!-- Tab Mi Cuenta (MEJORADA) -->
+    <!-- Tab Mi Cuenta (sin cambios) -->
     <div id="tab-me" class="tab-content" style="display:none;">
         <div class="card">
             <div class="card-title"><div class="icon icon-stats">👤</div> Mi Cuenta</div>
@@ -297,10 +301,10 @@
         </div>
     </div>
 
-    <!-- Tab Comprar -->
+    <!-- Tab Comprar (sin cambios) -->
     <div id="tab-buy" class="tab-content" style="display:none;">
         <div class="card">
-            <div class="card-title"><div class="icon icon-buy">💎</div> Planes de Acceso</div>
+            <div class="card-title"><div class="icon icon-stats">💎</div> Planes de Acceso</div>
             <div class="stats-grid">
                 <div class="stat-item">
                     <div class="stat-value">S/ 50</div>
