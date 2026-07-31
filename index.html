@@ -731,30 +731,74 @@
 
         // Mi Cuenta
         async function refreshStats() {
+            console.log('[Me] refreshStats called');
             const userId = user.id;
-            if (!userId) return;
+            if (!userId) {
+                console.error('[Me] No se pudo obtener el ID de usuario.');
+                alert('❌ No se pudo obtener tu ID de usuario.');
+                return;
+            }
+            console.log('[Me] userId:', userId);
+            // Feedback visual mientras se actualiza
+            const statIdEl = document.getElementById('stat-id');
+            const statRemainingEl = document.getElementById('stat-remaining');
+            const statSessionsEl = document.getElementById('stat-sessions');
+            const statLinksEl = document.getElementById('stat-links');
+            if (statIdEl) statIdEl.textContent = '...';
+            if (statRemainingEl) statRemainingEl.textContent = '...';
+            if (statSessionsEl) statSessionsEl.textContent = '...';
+            if (statLinksEl) statLinksEl.textContent = '...';
+
             try {
+                console.log('[Me] Fetching:', `${API_BASE}/api/me?user_id=${userId}`);
                 const response = await fetch(`${API_BASE}/api/me?user_id=${userId}`);
+                console.log('[Me] Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
                 const data = await response.json();
+                console.log('[Me] Data received:', data);
                 if (data.error) {
+                    console.error('[Me] Server error:', data.error);
+                    alert('❌ Error del servidor: ' + data.error);
                     return;
                 }
-                document.getElementById('stat-id').textContent = data.user_id;
-                document.getElementById('stat-remaining').textContent = data.remaining;
-                document.getElementById('stat-sessions').textContent = data.sessions;
-                document.getElementById('stat-links').textContent = data.links;
+                console.log('[Me] Updating DOM...');
+                if (statIdEl) statIdEl.textContent = data.user_id || '--';
+                if (statRemainingEl) statRemainingEl.textContent = data.remaining || '--';
+                if (statSessionsEl) statSessionsEl.textContent = data.sessions || '0';
+                if (statLinksEl) statLinksEl.textContent = data.links || '0';
+                console.log('[Me] DOM updated successfully.');
             } catch (e) {
-                console.error(e);
+                console.error('[Me] Exception in refreshStats:', e);
+                alert('❌ Error de conexión al actualizar estadísticas. Revisa consola.');
+                // Restaurar valores a -- en caso de error
+                if (statIdEl) statIdEl.textContent = '--';
+                if (statRemainingEl) statRemainingEl.textContent = '--';
+                if (statSessionsEl) statSessionsEl.textContent = '--';
+                if (statLinksEl) statLinksEl.textContent = '--';
             }
         }
 
         function switchTab(tabName) {
+            console.log('[Tabs] switchTab called with:', tabName);
             document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-            document.getElementById('tab-' + tabName).style.display = 'block';
+            const targetTab = document.getElementById('tab-' + tabName);
+            if (targetTab) {
+                targetTab.style.display = 'block';
+            } else {
+                console.warn('[Tabs] No se encontró el tab:', 'tab-' + tabName);
+            }
             document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-            event.target.classList.add('active');
-            if (tabName === 'me') refreshStats();
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+            if (tabName === 'me') {
+                console.log('[Tabs] Triggering refreshStats');
+                refreshStats();
+            }
             if (tabName === 'monitor') {
+                console.log('[Tabs] Triggering monitor lists');
                 loadMonitorList();
                 loadBannedHistory();
             }
