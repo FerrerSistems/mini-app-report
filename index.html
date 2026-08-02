@@ -126,7 +126,7 @@
         <div class="tab" onclick="switchTab('buy')">💰 Comprar</div>
     </div>
 
-    <!-- Tab Reportes -->
+    <!-- Tab Reportes (solo reportes) -->
     <div id="tab-report" class="tab-content">
         <!-- Reporte masivo -->
         <div class="card">
@@ -198,7 +198,7 @@
         </div>
     </div>
 
-    <!-- Tab Funciones -->
+    <!-- Tab Funciones (Get IDs, Pinned IDs, Join/Leave) -->
     <div id="tab-funciones" class="tab-content" style="display:none;">
         <!-- Get IDs -->
         <div class="card">
@@ -241,7 +241,7 @@
         </div>
     </div>
 
-    <!-- Tab Monitoreo -->
+    <!-- Tab Monitoreo (sin cambios) -->
     <div id="tab-monitor" class="tab-content" style="display:none;">
         <div class="card">
             <div class="card-title"><div class="icon icon-monitor">🔍</div> Mi Lista de Monitoreo</div>
@@ -267,7 +267,7 @@
         </div>
     </div>
 
-    <!-- Tab Mi Cuenta (MEJORADA con proxies) -->
+    <!-- Tab Mi Cuenta (SIN proxies) -->
     <div id="tab-me" class="tab-content" style="display:none;">
         <div class="card">
             <div class="card-title"><div class="icon icon-stats">👤</div> Mi Cuenta</div>
@@ -296,17 +296,12 @@
                     <div class="stat-value" id="stat-links">--</div>
                     <div class="stat-label">Links Monitoreados</div>
                 </div>
-                <!-- NUEVO: proxies activas -->
-                <div class="stat-item">
-                    <div class="stat-value" id="stat-proxies">--</div>
-                    <div class="stat-label">Proxies Activas</div>
-                </div>
             </div>
             <button class="btn btn-primary" onclick="refreshStats()">🔄 Actualizar Estadísticas</button>
         </div>
     </div>
 
-    <!-- Tab Comprar -->
+    <!-- Tab Comprar (sin cambios) -->
     <div id="tab-buy" class="tab-content" style="display:none;">
         <div class="card">
             <div class="card-title"><div class="icon icon-stats">💎</div> Planes de Acceso</div>
@@ -746,7 +741,7 @@
             sendCommand('/monitorremove ' + target, 'monitor-result');
         }
 
-        // Mi Cuenta (ACTUALIZADO con proxies)
+        // Mi Cuenta (versión original, sin proxies)
         async function refreshStats() {
             console.log('[Me] refreshStats called');
             const userId = user.id;
@@ -763,7 +758,6 @@
             document.getElementById('stat-days').textContent = '...';
             document.getElementById('stat-sessions').textContent = '...';
             document.getElementById('stat-links').textContent = '...';
-            document.getElementById('stat-proxies').textContent = '...';   // ← nuevo
 
             try {
                 console.log('[Me] Fetching:', `${API_BASE}/api/me?user_id=${userId}`);
@@ -783,7 +777,6 @@
                 document.getElementById('stat-id').textContent = data.user_id || '--';
                 document.getElementById('stat-role').textContent = data.membership_type || '--';
                 document.getElementById('stat-added').textContent = data.added_date || '--';
-                // Mostrar infinito si days_left es -1, sino los días
                 if (data.days_left === -1) {
                     document.getElementById('stat-days').textContent = '∞';
                 } else {
@@ -791,7 +784,6 @@
                 }
                 document.getElementById('stat-sessions').textContent = data.sessions || '0';
                 document.getElementById('stat-links').textContent = data.links || '0';
-                document.getElementById('stat-proxies').textContent = data.proxies || '0';   // ← nuevo
                 console.log('[Me] DOM updated successfully.');
             } catch (e) {
                 console.error('[Me] Exception in refreshStats:', e);
@@ -803,7 +795,6 @@
                 document.getElementById('stat-days').textContent = '--';
                 document.getElementById('stat-sessions').textContent = '--';
                 document.getElementById('stat-links').textContent = '--';
-                document.getElementById('stat-proxies').textContent = '--';   // ← nuevo
             }
         }
 
