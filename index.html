@@ -126,7 +126,7 @@
         <div class="tab" onclick="switchTab('buy')">💰 Comprar</div>
     </div>
 
-    <!-- Tab Reportes (solo reportes) -->
+    <!-- Tab Reportes -->
     <div id="tab-report" class="tab-content">
         <!-- Reporte masivo -->
         <div class="card">
@@ -198,7 +198,7 @@
         </div>
     </div>
 
-    <!-- Tab Funciones (Get IDs, Pinned IDs, Join/Leave) -->
+    <!-- Tab Funciones -->
     <div id="tab-funciones" class="tab-content" style="display:none;">
         <!-- Get IDs -->
         <div class="card">
@@ -241,7 +241,7 @@
         </div>
     </div>
 
-    <!-- Tab Monitoreo (sin cambios) -->
+    <!-- Tab Monitoreo -->
     <div id="tab-monitor" class="tab-content" style="display:none;">
         <div class="card">
             <div class="card-title"><div class="icon icon-monitor">🔍</div> Mi Lista de Monitoreo</div>
@@ -267,7 +267,7 @@
         </div>
     </div>
 
-    <!-- Tab Mi Cuenta (sin cambios) -->
+    <!-- Tab Mi Cuenta (MEJORADA con proxies) -->
     <div id="tab-me" class="tab-content" style="display:none;">
         <div class="card">
             <div class="card-title"><div class="icon icon-stats">👤</div> Mi Cuenta</div>
@@ -296,12 +296,17 @@
                     <div class="stat-value" id="stat-links">--</div>
                     <div class="stat-label">Links Monitoreados</div>
                 </div>
+                <!-- NUEVO: proxies activas -->
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-proxies">--</div>
+                    <div class="stat-label">Proxies Activas</div>
+                </div>
             </div>
             <button class="btn btn-primary" onclick="refreshStats()">🔄 Actualizar Estadísticas</button>
         </div>
     </div>
 
-    <!-- Tab Comprar (sin cambios) -->
+    <!-- Tab Comprar -->
     <div id="tab-buy" class="tab-content" style="display:none;">
         <div class="card">
             <div class="card-title"><div class="icon icon-stats">💎</div> Planes de Acceso</div>
@@ -741,7 +746,7 @@
             sendCommand('/monitorremove ' + target, 'monitor-result');
         }
 
-        // Mi Cuenta (ACTUALIZADO con logs y nuevos campos)
+        // Mi Cuenta (ACTUALIZADO con proxies)
         async function refreshStats() {
             console.log('[Me] refreshStats called');
             const userId = user.id;
@@ -758,6 +763,7 @@
             document.getElementById('stat-days').textContent = '...';
             document.getElementById('stat-sessions').textContent = '...';
             document.getElementById('stat-links').textContent = '...';
+            document.getElementById('stat-proxies').textContent = '...';   // ← nuevo
 
             try {
                 console.log('[Me] Fetching:', `${API_BASE}/api/me?user_id=${userId}`);
@@ -785,6 +791,7 @@
                 }
                 document.getElementById('stat-sessions').textContent = data.sessions || '0';
                 document.getElementById('stat-links').textContent = data.links || '0';
+                document.getElementById('stat-proxies').textContent = data.proxies || '0';   // ← nuevo
                 console.log('[Me] DOM updated successfully.');
             } catch (e) {
                 console.error('[Me] Exception in refreshStats:', e);
@@ -796,6 +803,7 @@
                 document.getElementById('stat-days').textContent = '--';
                 document.getElementById('stat-sessions').textContent = '--';
                 document.getElementById('stat-links').textContent = '--';
+                document.getElementById('stat-proxies').textContent = '--';   // ← nuevo
             }
         }
 
