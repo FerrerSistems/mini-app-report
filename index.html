@@ -148,6 +148,27 @@
             <div class="result-box" id="report-result"></div>
         </div>
 
+        <!-- Private -->
+        <div class="card">
+            <div class="card-title"><div class="icon icon-action">🔒</div> Reporte Privado</div>
+            <div class="form-group">
+                <label class="form-label">Enlace t.me/c/...</label>
+                <input type="text" class="form-input" id="private-target" placeholder="https://t.me/c/123456789/6">
+                <span class="form-hint">Enlace al mensaje del chat privado</span>
+            </div>
+            <div class="form-group">
+                <label class="form-label">IDs adicionales (opcional)</label>
+                <input type="text" class="form-input" id="private-extra-ids" placeholder="8,9,10">
+                <span class="form-hint">Separa con comas</span>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Cantidad por sesión (1-500)</label>
+                <input type="number" class="form-input" id="private-quantity" value="10" min="1" max="500">
+            </div>
+            <button class="btn btn-primary" onclick="sendPrivateReport()">🔒 Iniciar Reporte Privado</button>
+            <div class="result-box" id="private-result"></div>
+        </div>
+
         <!-- Photo -->
         <div class="card">
             <div class="card-title"><div class="icon icon-action">📸</div> Reportar Foto</div>
@@ -620,6 +641,37 @@
             } catch (e) {
                 console.error(e);
                 showResult('report-result', errorHTML('Error de conexión.'));
+            }
+        }
+
+        // Private report
+        async function sendPrivateReport() {
+            const target = document.getElementById('private-target').value.trim();
+            const extraIds = document.getElementById('private-extra-ids').value.trim();
+            const quantity = document.getElementById('private-quantity').value.trim();
+            const userId = user.id;
+
+            if (!target || !userId) {
+                showResult('private-result', errorHTML('Completa el enlace y asegúrate de estar identificado.'));
+                return;
+            }
+
+            showResult('private-result', loadingHTML('Buscando sesiones con acceso...'));
+            try {
+                const url = `${API_BASE}/api/private?target=${encodeURIComponent(target)}&extra_ids=${encodeURIComponent(extraIds)}&quantity=${encodeURIComponent(quantity)}&user_id=${userId}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.error) {
+                    showResult('private-result', errorHTML(data.error));
+                } else {
+                    renderResponse('private-result', {
+                        messages: [data.info || 'Selecciona el tipo de violación:'],
+                        keyboard: data.keyboard
+                    });
+                }
+            } catch (e) {
+                console.error(e);
+                showResult('private-result', errorHTML('Error de conexión.'));
             }
         }
 
