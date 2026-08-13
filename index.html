@@ -42,6 +42,7 @@
         .icon-stats { background:rgba(255,215,64,0.15); color:#ffd740; }
         .icon-action { background:rgba(255,82,82,0.15); color:#ff5252; }
         .icon-func { background:rgba(0,200,83,0.15); color:#00c853; }
+        .icon-info { background:rgba(64,196,255,0.15); color:#40c4ff; }
 
         .form-group { margin-bottom:12px; }
         .form-label { display:block; font-size:12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; }
@@ -104,6 +105,15 @@
         .footer { text-align:center; margin-top:24px; padding:16px; color:var(--text-secondary); font-size:12px; }
         .footer a { color:var(--accent); text-decoration:none; }
 
+        /* Nuevos estilos para Instrucciones */
+        .instruction-card { margin-bottom:12px; padding:16px; background:var(--bg); border-radius:12px; border:1px solid var(--border); }
+        .instruction-title { font-size:14px; font-weight:600; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+        .instruction-content { font-size:13px; color:var(--text-secondary); line-height:1.5; }
+        .instruction-content ul { list-style:none; padding-left:0; }
+        .instruction-content li { margin-bottom:6px; padding-left:16px; position:relative; }
+        .instruction-content li::before { content:"•"; position:absolute; left:0; color:var(--accent); font-weight:bold; }
+        .instruction-content strong { color:var(--text); }
+
         @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 
         @media (max-width:360px) {
@@ -124,6 +134,7 @@
         <div class="tab" onclick="switchTab('monitor')">🔍 Monitoreo</div>
         <div class="tab" onclick="switchTab('me')">👤 Mi Cuenta</div>
         <div class="tab" onclick="switchTab('buy')">💰 Comprar</div>
+        <div class="tab" onclick="switchTab('instrucciones')">📖 Instrucciones</div>
     </div>
 
     <!-- Tab Reportes (solo reportes) -->
@@ -349,6 +360,138 @@
         </div>
     </div>
 
+    <!-- Tab Instrucciones -->
+    <div id="tab-instrucciones" class="tab-content" style="display:none;">
+        <div class="card">
+            <div class="card-title"><div class="icon icon-info">📖</div> Instrucciones de Uso y Buenas Prácticas</div>
+            <div class="instruction-card">
+                <div class="instruction-title">⚙️ Workers con Responsabilidad</div>
+                <div class="instruction-content">
+                    <ul>
+                        <li>Los <strong>workers</strong> significan cuentas reportando al mismo tiempo con poca espera entre reportes.</li>
+                        <li>Usa workers <strong>solo con moderación</strong>; en exceso no tendrá efecto.</li>
+                        <li>No uses workers para reportar contenido no ilegal: insultos, paisajes, música, vlogs, etc.</li>
+                        <li>El mal uso <strong>quema las cuentas</strong> y reduce la efectividad en baneos de contenido grave.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="instruction-card">
+                <div class="instruction-title">🚫 Prohibiciones y Revocación</div>
+                <div class="instruction-content">
+                    <ul>
+                        <li>Está <strong>terminantemente prohibido</strong> reportar cosas no ilegales (insultos, paisajes, música, vlogs, etc.).</li>
+                        <li>Si detectamos este uso, tu acceso será <strong>revocado</strong>.</li>
+                        <li>No reportes canales, bots, grupos del <strong>creador</strong> o de este sistema de reportes.</li>
+                        <li>Intentar dañar o quemar las sesiones del bot también es motivo de <strong>baneo permanente</strong>.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="instruction-card">
+                <div class="instruction-title">🎯 Efectividad en Reportes</div>
+                <div class="instruction-content">
+                    <ul>
+                        <li>El bot banea mejor si reportas <strong>cosas graves</strong>: drogas, malware, doxing, armas, pornografía infantil, etc.</li>
+                        <li>Si un grupo/canal/cuenta/bot no cae tras varios intentos, <strong>para</strong>. No caerá. Intenta con otro objetivo o deja reposar el bot unas horas.</li>
+                        <li>Puedes combinar el bot con reportes desde tu correo a Telegram; a veces la combinación aumenta la efectividad un 50%.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="instruction-card">
+                <div class="instruction-title">📢 Uso del Comando /abuse</div>
+                <div class="instruction-content">
+                    <ul>
+                        <li>Usa <strong>/abuse</strong> para enviar textos de denuncia; basta con 1 o 2 intentos por contenido.</li>
+                        <li>No lo uses para spam del mismo canal/grupo/usuario/bot.</li>
+                        <li>Envía <strong>imagen o video con caption</strong> (texto descriptivo); no mandes captura sola.</li>
+                        <li>Una denuncia necesita contexto y evidencia; enviar tonterías quema las cuentas y puede revocar tu acceso.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="instruction-card">
+                <div class="instruction-title">🔍 Monitoreo</div>
+                <div class="instruction-content">
+                    <ul>
+                        <li>Agregar enlaces al monitoreo es <strong>estrictamente para contenido ilegal</strong>.</li>
+                        <li>El monitoreo verifica cada cierto tiempo si algo es baneado.</li>
+                        <li>Agregar enlaces no ilegales hace que las cuentas trabajen en vano y se quemen.</li>
+                        <li>El mal uso del monitoreo también es motivo de revocación.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="instruction-card">
+                <div class="instruction-title">👤 Cuentas Personales</div>
+                <div class="instruction-content">
+                    <ul>
+                        <li>Las cuentas personales son más difíciles de banear.</li>
+                        <li>Puedes reportar su <strong>historia</strong> o <strong>foto de perfil</strong>, pero solo si contienen algo ilegal grave.</li>
+                        <li>No reportes una cuenta solo porque le tienes odio; si no hay ilegal visible, <strong>no caerá</strong> y quemarás las cuentas.</li>
+                        <li>Se recomienda combinar con denuncias por correo u otras vías propias.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="instruction-card">
+                <div class="instruction-title">💰 Venta de Baneos y Referidos</div>
+                <div class="instruction-content">
+                    <ul>
+                        <li>Puedes vender los baneos que hagas; no te pediremos nada.</li>
+                        <li>No intentes tumbar algo no ilegal por desesperación de dinero; no caerá y te perjudicará.</li>
+                        <li>Por cada referido directo ganas el <strong>10%</strong>.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="instruction-card">
+                <div class="instruction-title">📋 Condiciones Generales</div>
+                <div class="instruction-content">
+                    <ul>
+                        <li>Al usar el bot aceptas que has leído y aceptado los <strong>términos y condiciones</strong> (usa /terminos).</li>
+                        <li>No hay reembolsos.</li>
+                        <li>El bot funciona al 100% si sabes usarlo y lees las condiciones.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="instruction-card">
+                <div class="instruction-title">🔑 Uso de Comandos Específicos</div>
+                <div class="instruction-content">
+                    <ul>
+                        <li><strong>/join</strong>: únete a un grupo/canal privado.</li>
+                        <li><strong>/leave</strong>: sal de un grupo/canal que ya no vas a seguir reportando.</li>
+                        <li><strong>/private</strong>: reporta mensajes de grupos privados; se usa después de /join.</li>
+                        <li><strong>/bot</strong>: reporta bots; las cuentas enviarán comandos al bot para sacar contenido.</li>
+                        <li><strong>/captura</strong>: toma foto del link o usuario de Telegram.</li>
+                        <li><strong>/report</strong>: reporta grupos/canales públicos; <strong>/photo</strong> y <strong>/history</strong> para cuentas personales.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="instruction-card">
+                <div class="instruction-title">⚠️ Errores Comunes</div>
+                <div class="instruction-content">
+                    <ul>
+                        <li>En <strong>/private</strong> y <strong>/report</strong>, asegúrate de poner bien los IDs, comas, espacios y barras.</li>
+                        <li>A veces el comando tira error porque pusiste algo mal, no porque no funcione.</li>
+                        <li>Si un grupo/canal tiene solicitud de aprobación, espera unas horas; a veces el admin rechazará o invalidará el link.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="instruction-card">
+                <div class="instruction-title">💬 Soporte</div>
+                <div class="instruction-content">
+                    <p>Para cualquier duda, revisa <strong>menú</strong>, <strong>ayuda</strong> o simplemente ejecuta un comando sin nada y te dirá los pasos.</p>
+                    <p>También puedes contactar al soporte en <a href="https://t.me/thyrofc" target="_blank" style="color:var(--accent);">@thyrofc</a>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="footer">
         <p>© 2026 <a href="https://t.me/thyrofc" target="_blank">GhostReports</a> - Todos los derechos reservados.</p>
         <p style="margin-top:4px;">Usa este bot de manera responsable.</p>
@@ -367,7 +510,6 @@
         console.log('[MiniApp] API_BASE:', API_BASE);
         console.log('[MiniApp] Usuario:', user);
 
-        // Copiar al portapapeles
         function copyToClipboard(text) {
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(text).catch(e => console.error(e));
@@ -381,7 +523,6 @@
             }
         }
 
-        // Mostrar resultado en caja
         function showResult(elementId, html) {
             const el = document.getElementById(elementId);
             if (!el) return;
@@ -416,7 +557,6 @@
             return `<div style="color:var(--accent);">✅ ${message}</div>`;
         }
 
-        // ---------- Monitor de progreso en vivo ----------
         let pollingInterval = null;
 
         function stopLiveMonitor() {
@@ -460,7 +600,6 @@
             }, 1500);
         }
 
-        // ---------- Renderizar respuesta ----------
         function renderResponse(resultElementId, data) {
             stopLiveMonitor();
             if (data.finished) {
@@ -523,7 +662,6 @@
             showResult(resultElementId, html);
         }
 
-        // ---------- Enviar comandos y callbacks ----------
         async function sendCommand(command, resultElementId) {
             const userId = user.id;
             if (!userId) {
@@ -583,7 +721,6 @@
             }
         }
 
-        // Enviar texto
         async function sendText(resultElementId) {
             const text = document.getElementById('dynamic-text-input')?.value.trim();
             if (!text) return;
@@ -616,7 +753,6 @@
             }
         }
 
-        // Reporte masivo
         async function sendReport() {
             const target = document.getElementById('report-target').value.trim();
             const ids = document.getElementById('report-ids').value.trim();
@@ -644,7 +780,6 @@
             }
         }
 
-        // Private report
         async function sendPrivateReport() {
             const target = document.getElementById('private-target').value.trim();
             const extraIds = document.getElementById('private-extra-ids').value.trim();
@@ -675,7 +810,6 @@
             }
         }
 
-        // Pinned IDs
         async function sendPinnedCommand() {
             const target = document.getElementById('getidpin-target').value.trim();
             if (!target) {
@@ -704,7 +838,6 @@
             }
         }
 
-        // Monitoreo
         async function loadMonitorList() {
             const userId = user.id;
             if (!userId) return;
@@ -793,7 +926,6 @@
             sendCommand('/monitorremove ' + target, 'monitor-result');
         }
 
-        // Mi Cuenta (versión original, sin proxies)
         async function refreshStats() {
             console.log('[Me] refreshStats called');
             const userId = user.id;
@@ -803,7 +935,6 @@
                 return;
             }
             console.log('[Me] userId:', userId);
-            // Feedback visual mientras se actualiza
             document.getElementById('stat-id').textContent = '...';
             document.getElementById('stat-role').textContent = '...';
             document.getElementById('stat-added').textContent = '...';
@@ -840,7 +971,6 @@
             } catch (e) {
                 console.error('[Me] Exception in refreshStats:', e);
                 alert('❌ Error de conexión al actualizar estadísticas. Revisa consola.');
-                // Restaurar valores a -- en caso de error
                 document.getElementById('stat-id').textContent = '--';
                 document.getElementById('stat-role').textContent = '--';
                 document.getElementById('stat-added').textContent = '--';
@@ -871,6 +1001,9 @@
                 console.log('[Tabs] Triggering monitor lists');
                 loadMonitorList();
                 loadBannedHistory();
+            }
+            if (tabName === 'instrucciones') {
+                console.log('[Tabs] Instrucciones cargadas');
             }
         }
 
