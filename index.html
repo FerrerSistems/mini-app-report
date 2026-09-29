@@ -5,15 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>GhostReports - Panel de Control</title>
     <style>
-        /* ===== Fuente personalizada desde la raíz ===== */
-        @font-face {
-            font-family: 'Pencil';
-            src: url('pencil.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-            font-display: swap;
-        }
-
         :root {
             --bg: #0f0f0f;
             --card: #1a1a1a;
@@ -48,15 +39,14 @@
             overflow-x: hidden;
         }
 
-        /* Capa oscura para que el contenido se lea bien sobre la foto
-           (opacidad reducida un 20% respecto a la versión anterior) */
+        /* Capa oscura sobre el fondo (opacidad reducida otro 40%) */
         body::before {
             content: '';
             position: fixed;
             inset: 0;
             background:
-                radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0.44) 0%, rgba(0,0,0,0.68) 60%, rgba(10,10,10,0.76) 100%),
-                rgba(10,10,10,0.44);
+                radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0.26) 0%, rgba(0,0,0,0.41) 60%, rgba(10,10,10,0.46) 100%),
+                rgba(10,10,10,0.26);
             z-index: 0;
             pointer-events: none;
         }
@@ -105,9 +95,7 @@
             96.5% { opacity: 0; }
         }
 
-        /* ===== Header: pizarra de tiza recreada 100% en CSS =====
-           Color, textura y degradado de pizarra. Sin relieves,
-           sin esquinas redondeadas, sin marco de madera. */
+        /* ===== Header ===== */
         .header {
             text-align: center;
             margin-bottom: 24px;
@@ -116,55 +104,13 @@
             z-index: 1;
         }
 
-        .chalkboard {
-            display: inline-block;
-            position: relative;
-            padding: 26px 48px;
+        .logo-svg {
+            display: block;
+            margin: 0 auto;
+            width: 340px;
             max-width: 92vw;
-            /* Color base de pizarra verde-gris oscura */
-            background-color: #2a2f2c;
-            /* Textura de tiza usada: manchas difusas claras y oscuras + grano sutil */
-            background-image:
-                radial-gradient(ellipse at 18% 22%, rgba(255,255,255,0.045) 0%, transparent 55%),
-                radial-gradient(ellipse at 82% 78%, rgba(255,255,255,0.035) 0%, transparent 55%),
-                radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.02) 0%, transparent 70%),
-                radial-gradient(circle at 30% 60%, rgba(0,0,0,0.25) 0%, transparent 40%),
-                radial-gradient(circle at 70% 35%, rgba(0,0,0,0.22) 0%, transparent 40%),
-                repeating-linear-gradient(115deg,
-                    rgba(255,255,255,0.012) 0px,
-                    rgba(255,255,255,0.012) 1px,
-                    transparent 1px,
-                    transparent 3px
-                ),
-                repeating-linear-gradient(65deg,
-                    rgba(0,0,0,0.025) 0px,
-                    rgba(0,0,0,0.025) 1px,
-                    transparent 1px,
-                    transparent 4px
-                ),
-                /* Degradado general de iluminación de pizarra */
-                linear-gradient(160deg, #333934 0%, #2b302c 35%, #222723 70%, #1c211d 100%);
-            background-blend-mode: normal, normal, normal, normal, normal, overlay, overlay, normal;
-            /* SIN border-radius, SIN box-shadow, SIN relieve */
-        }
-
-        .logo {
-            position: relative;
-            z-index: 1;
-            font-family: 'Pencil', 'Comic Sans MS', cursive;
-            font-size: 33px;
-            font-weight: normal;
-            color: #f4f4f0;
-            letter-spacing: 2px;
-            line-height: 1.1;
-            /* Efecto tiza: brillo difuso blanco */
-            text-shadow:
-                0 0 1px rgba(255,255,255,0.85),
-                0 0 6px rgba(255,255,255,0.35),
-                0 0 14px rgba(200,220,255,0.15),
-                1px 1px 0 rgba(160,180,160,0.25);
-            filter: drop-shadow(0 0 0.6px rgba(255,255,255,0.45));
-            user-select: none;
+            height: auto;
+            overflow: visible;
         }
 
         .subtitle {
@@ -175,7 +121,7 @@
             margin-top: 14px;
         }
 
-        /* ===== Resto del panel (por encima del glitch) ===== */
+        /* ===== Cards y resto del panel ===== */
         .card {
             background: var(--card);
             border: 1px solid var(--border);
@@ -215,7 +161,32 @@
 
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .stat-item { background: var(--bg); border-radius: 12px; padding: 14px; text-align: center; }
-        .stat-value { font-size: 24px; font-weight: 700; color: var(--accent); }
+
+        /* Letras verdes con brillo animado que recorre el texto */
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            background-image: linear-gradient(100deg,
+                #00c853 0%,
+                #00c853 38%,
+                #c4ffd6 50%,
+                #00c853 62%,
+                #00c853 100%);
+            background-size: 260% 100%;
+            background-position: 200% 0;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: #00c853;
+            animation: greenShine 3.6s linear infinite;
+            background-repeat: no-repeat;
+        }
+
+        @keyframes greenShine {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
         .stat-label { font-size: 11px; color: var(--text-secondary); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
 
         .status { padding: 12px; border-radius: 10px; font-size: 13px; margin-top: 12px; display: none; }
@@ -271,8 +242,7 @@
 
         @media (max-width: 360px) {
             .stats-grid { grid-template-columns: 1fr; }
-            .logo { font-size: 25px; }
-            .chalkboard { padding: 20px 30px; }
+            .logo-svg { width: 280px; }
         }
     </style>
 </head>
@@ -286,9 +256,82 @@
     </div>
 
     <div class="header">
-        <div class="chalkboard">
-            <div class="logo">GhostReports</div>
-        </div>
+        <!-- Título GhostReports replicado en SVG con estilo segmentado del ejemplo:
+             trazos blancos con acentos cian (#00e5ff) y magenta (#ff2d95),
+             sin fondo, sin marco, sin relieves. -->
+        <svg class="logo-svg" viewBox="0 0 720 95" xmlns="http://www.w3.org/2000/svg" aria-label="GhostReports">
+            <!-- G -->
+            <rect x="5"  y="10" width="40" height="5" fill="#ffffff"/>
+            <rect x="0"  y="15" width="5"  height="60" fill="#ffffff"/>
+            <rect x="5"  y="75" width="40" height="5" fill="#ffffff"/>
+            <rect x="45" y="50" width="5"  height="30" fill="#ffffff"/>
+            <rect x="30" y="45" width="20" height="5" fill="#00e5ff"/>
+
+            <!-- h -->
+            <rect x="60"  y="10" width="5"  height="70" fill="#ffffff"/>
+            <rect x="65"  y="35" width="40" height="5" fill="#ffffff"/>
+            <rect x="105" y="35" width="5"  height="45" fill="#ffffff"/>
+
+            <!-- o -->
+            <rect x="125" y="35" width="40" height="5" fill="#ff2d95"/>
+            <rect x="125" y="75" width="40" height="5" fill="#ffffff"/>
+            <rect x="120" y="40" width="5"  height="35" fill="#ffffff"/>
+            <rect x="165" y="40" width="5"  height="35" fill="#ffffff"/>
+
+            <!-- s -->
+            <rect x="185" y="35" width="40" height="5" fill="#ffffff"/>
+            <rect x="220" y="40" width="5"  height="15" fill="#ffffff"/>
+            <rect x="185" y="55" width="40" height="5" fill="#ffffff"/>
+            <rect x="180" y="60" width="5"  height="15" fill="#ffffff"/>
+            <rect x="185" y="75" width="40" height="5" fill="#ffffff"/>
+
+            <!-- t -->
+            <rect x="245" y="35" width="40" height="5" fill="#00e5ff"/>
+            <rect x="262" y="40" width="5"  height="40" fill="#ffffff"/>
+
+            <!-- R -->
+            <rect x="300" y="10" width="5"  height="70" fill="#ffffff"/>
+            <rect x="305" y="10" width="40" height="5" fill="#ffffff"/>
+            <rect x="345" y="15" width="5"  height="20" fill="#ffffff"/>
+            <rect x="305" y="35" width="40" height="5" fill="#ffffff"/>
+            <rect x="320" y="40" width="5"  height="40" fill="#ffffff"/>
+
+            <!-- e -->
+            <rect x="365" y="35" width="40" height="5" fill="#ffffff"/>
+            <rect x="360" y="40" width="5"  height="35" fill="#ffffff"/>
+            <rect x="365" y="55" width="40" height="5" fill="#ff2d95"/>
+            <rect x="365" y="75" width="40" height="5" fill="#ffffff"/>
+            <rect x="405" y="40" width="5"  height="15" fill="#ffffff"/>
+
+            <!-- p -->
+            <rect x="420" y="35" width="5"  height="55" fill="#ffffff"/>
+            <rect x="425" y="35" width="40" height="5" fill="#ffffff"/>
+            <rect x="465" y="40" width="5"  height="35" fill="#ffffff"/>
+            <rect x="425" y="75" width="40" height="5" fill="#ffffff"/>
+
+            <!-- o -->
+            <rect x="485" y="35" width="40" height="5" fill="#00e5ff"/>
+            <rect x="485" y="75" width="40" height="5" fill="#ffffff"/>
+            <rect x="480" y="40" width="5"  height="35" fill="#ffffff"/>
+            <rect x="525" y="40" width="5"  height="35" fill="#ffffff"/>
+
+            <!-- r -->
+            <rect x="540" y="35" width="5"  height="45" fill="#ffffff"/>
+            <rect x="545" y="35" width="40" height="5" fill="#ff2d95"/>
+            <rect x="585" y="40" width="5"  height="15" fill="#ffffff"/>
+
+            <!-- t -->
+            <rect x="605" y="35" width="40" height="5" fill="#00e5ff"/>
+            <rect x="622" y="40" width="5"  height="40" fill="#ffffff"/>
+
+            <!-- s -->
+            <rect x="665" y="35" width="40" height="5" fill="#ffffff"/>
+            <rect x="700" y="40" width="5"  height="15" fill="#ffffff"/>
+            <rect x="665" y="55" width="40" height="5" fill="#ff2d95"/>
+            <rect x="660" y="60" width="5"  height="15" fill="#ffffff"/>
+            <rect x="665" y="75" width="40" height="5" fill="#ffffff"/>
+        </svg>
+
         <div class="subtitle">Panel de Control</div>
     </div>
 
