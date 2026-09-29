@@ -34,7 +34,6 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
             background-color: var(--bg);
-            /* === Fondo: cambia la extensión si tu archivo es .png/.webp === */
             background-image: url('Background.png');
             background-size: cover;
             background-position: center center;
@@ -49,14 +48,15 @@
             overflow-x: hidden;
         }
 
-        /* Capa oscura para que el contenido se lea bien sobre la foto */
+        /* Capa oscura para que el contenido se lea bien sobre la foto
+           (opacidad reducida un 20% respecto a la versión anterior) */
         body::before {
             content: '';
             position: fixed;
             inset: 0;
             background:
-                radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.85) 60%, rgba(10,10,10,0.95) 100%),
-                rgba(10,10,10,0.55);
+                radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0.44) 0%, rgba(0,0,0,0.68) 60%, rgba(10,10,10,0.76) 100%),
+                rgba(10,10,10,0.44);
             z-index: 0;
             pointer-events: none;
         }
@@ -105,7 +105,9 @@
             96.5% { opacity: 0; }
         }
 
-        /* ===== Header con pizarra de madera ===== */
+        /* ===== Header: pizarra de tiza recreada 100% en CSS =====
+           Color, textura y degradado de pizarra. Sin relieves,
+           sin esquinas redondeadas, sin marco de madera. */
         .header {
             text-align: center;
             margin-bottom: 24px;
@@ -117,52 +119,40 @@
         .chalkboard {
             display: inline-block;
             position: relative;
-            padding: 22px 44px;
-            border-radius: 12px;
-            /* Vetas de madera + gradiente de madera */
-            background:
-                repeating-linear-gradient(90deg,
-                    rgba(0,0,0,0.14) 0px,
-                    rgba(0,0,0,0.14) 1px,
-                    rgba(255,255,255,0.04) 1px,
-                    rgba(255,255,255,0.04) 3px,
-                    transparent 3px,
-                    transparent 8px
-                ),
-                repeating-linear-gradient(0deg,
-                    rgba(0,0,0,0.05) 0px,
-                    rgba(0,0,0,0.05) 2px,
-                    transparent 2px,
-                    transparent 6px
-                ),
-                linear-gradient(160deg, #8a5a2b 0%, #a5713a 22%, #7a4d22 55%, #5c3816 100%);
-            box-shadow:
-                0 12px 32px rgba(0,0,0,0.75),
-                0 2px 0 rgba(255,255,255,0.06) inset,
-                0 -3px 10px rgba(0,0,0,0.55) inset;
+            padding: 26px 48px;
             max-width: 92vw;
-        }
-
-        /* La pizarra (superficie verde oscura con textura de tiza) */
-        .chalkboard::before {
-            content: '';
-            position: absolute;
-            inset: 12px;
-            border-radius: 5px;
-            background:
-                radial-gradient(ellipse at 22% 28%, rgba(255,255,255,0.05) 0%, transparent 55%),
-                radial-gradient(ellipse at 78% 72%, rgba(255,255,255,0.035) 0%, transparent 55%),
-                radial-gradient(ellipse at 50% 50%, #16271a 0%, #0a130c 100%);
-            box-shadow:
-                inset 0 0 45px rgba(0,0,0,0.9),
-                inset 0 0 10px rgba(0,0,0,0.7);
+            /* Color base de pizarra verde-gris oscura */
+            background-color: #2a2f2c;
+            /* Textura de tiza usada: manchas difusas claras y oscuras + grano sutil */
+            background-image:
+                radial-gradient(ellipse at 18% 22%, rgba(255,255,255,0.045) 0%, transparent 55%),
+                radial-gradient(ellipse at 82% 78%, rgba(255,255,255,0.035) 0%, transparent 55%),
+                radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.02) 0%, transparent 70%),
+                radial-gradient(circle at 30% 60%, rgba(0,0,0,0.25) 0%, transparent 40%),
+                radial-gradient(circle at 70% 35%, rgba(0,0,0,0.22) 0%, transparent 40%),
+                repeating-linear-gradient(115deg,
+                    rgba(255,255,255,0.012) 0px,
+                    rgba(255,255,255,0.012) 1px,
+                    transparent 1px,
+                    transparent 3px
+                ),
+                repeating-linear-gradient(65deg,
+                    rgba(0,0,0,0.025) 0px,
+                    rgba(0,0,0,0.025) 1px,
+                    transparent 1px,
+                    transparent 4px
+                ),
+                /* Degradado general de iluminación de pizarra */
+                linear-gradient(160deg, #333934 0%, #2b302c 35%, #222723 70%, #1c211d 100%);
+            background-blend-mode: normal, normal, normal, normal, normal, overlay, overlay, normal;
+            /* SIN border-radius, SIN box-shadow, SIN relieve */
         }
 
         .logo {
             position: relative;
             z-index: 1;
             font-family: 'Pencil', 'Comic Sans MS', cursive;
-            font-size: 44px;
+            font-size: 33px;
             font-weight: normal;
             color: #f4f4f0;
             letter-spacing: 2px;
@@ -281,8 +271,8 @@
 
         @media (max-width: 360px) {
             .stats-grid { grid-template-columns: 1fr; }
-            .logo { font-size: 34px; }
-            .chalkboard { padding: 18px 28px; }
+            .logo { font-size: 25px; }
+            .chalkboard { padding: 20px 30px; }
         }
     </style>
 </head>
